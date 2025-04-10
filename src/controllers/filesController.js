@@ -3,7 +3,19 @@ const path = require("path");
 const fs = require("fs");
 const util = require("util");
 const unlink = util.promisify(fs.unlink);
-const { simplifyMimeType, encodeFilename } = require("../utils/fileHelpers");
+const { simplifyMimeType } = require("../utils/fileHelpers");
+
+function sanitizeFilenameForContentDisposition(filename) {
+  let sanitized = filename
+    .replace(/[\r\n]/g, " ")
+    .replace(/[\x00-\x1F\x7F]/g, "")
+    .replace(/[\u0080-\u009F]/g, "")
+    .replace(/"/g, "'");
+
+  sanitized = sanitized.trim();
+
+  return sanitized;
+}
 
 exports.renderFilesPage = async (req, res) => {
   try {
@@ -27,9 +39,21 @@ exports.uploadFile = async (req, res) => {
       return res.status(400).json({ error: "No file uploaded" });
     }
 
-    const { originalname, mimetype, size, path: filePath } = req.file;
+    let originalname = req.file.originalname;
+
+    try {
+      const decoded = decodeURIComponent(escape(originalname));
+      if (decoded !== originalname) {
+        originalname = decoded;
+      }
+    } catch (decodeErr) {
+      console.log("Could not decode filename:", decodeErr);
+    }
+
+    const { mimetype, size, path: filePath } = req.file;
     const { name, surname } = req.user;
     const simplifiedType = simplifyMimeType(mimetype);
+
     const existingFile = await File.findByName(originalname);
 
     if (existingFile) {
@@ -101,24 +125,27 @@ exports.deleteFile = async (req, res) => {
 exports.downloadFile = async (req, res) => {
   try {
     const { id } = req.params;
-    const file = await File.findById(id);
+    const fileRow = await File.findById(id);
 
-    if (!file) {
+    if (!fileRow) {
       return res.status(404).render("error", {
         message: "File not found",
       });
     }
 
     const fileInfo = await File.getFileInfo(id);
+    if (!fileInfo) {
+      return res.status(404).render("error", {
+        message: "File not found",
+      });
+    }
 
-    res.setHeader(
-      "Content-Disposition",
-      `attachment; ${encodeFilename(fileInfo.file_name)}`
+    const sanitizedFilename = sanitizeFilenameForContentDisposition(
+      fileInfo.file_name
     );
 
     const extension = path.extname(fileInfo.file_name).toLowerCase();
     let contentType = fileInfo.type;
-
     if (extension === ".docx") {
       contentType =
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
@@ -129,7 +156,16 @@ exports.downloadFile = async (req, res) => {
 
     res.setHeader("Content-Type", contentType);
 
-    return res.download(file.path, fileInfo.file_name);
+    return res.download(fileRow.path, sanitizedFilename, (err) => {
+      if (err) {
+        console.error("Error sending file:", err);
+        if (!res.headersSent) {
+          res.status(500).render("error", {
+            message: "Error downloading file",
+          });
+        }
+      }
+    });
   } catch (error) {
     console.error("Error downloading file:", error);
     return res.status(500).render("error", {

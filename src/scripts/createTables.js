@@ -1,6 +1,7 @@
 async function createTables(pool) {
   try {
     await pool.query("BEGIN");
+    await pool.query("SET client_encoding = 'UTF8';");
     await pool.query(`
         CREATE OR REPLACE FUNCTION update_modified_column()
         RETURNS TRIGGER AS $$
