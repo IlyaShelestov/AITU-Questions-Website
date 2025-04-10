@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> | AITU Questions</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <% if (locals.customCss) { %>
+        <link rel="stylesheet" href="/css/<%= customCss %>.css">
+    <% } %>
+</head>
+<body>
+    <header>
+        <div class="logo">AITU Questions</div>
+        <% if (locals.user) { %>
+            <nav>
+                <ul>
+                    <li><a href="/files">Files</a></li>
+                    <li><a href="/chat">Chat</a></li>
+                    <% if (user.role === 'admin') { %>
+                        <li><a href="/admin">Admin</a></li>
+                    <% } %>
+                    <li>
+                        <form action="/auth/logout" method="POST">
+                            <button type="submit">Logout</button>
+                        </form>
+                    </li>
+                </ul>
+            </nav>
+        <% } %>
+    </header>
+    <main>

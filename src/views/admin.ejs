@@ -1,0 +1,131 @@
+<%- include('partials/header', { title: 'Admin Dashboard', customCss: 'admin' }) %>
+
+<div class="admin-container">
+    <h1>Admin Dashboard</h1>
+    
+    <div class="user-management">
+        <h2>User Management</h2>
+        
+        <div class="add-user-section">
+            <h3>Add New User</h3>
+            <form id="add-user-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="name">First Name</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="surname">Last Name</label>
+                        <input type="text" id="surname" name="surname" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="role">Role</label>
+                    <select id="role" name="role">
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Add User</button>
+            </form>
+        </div>
+        
+        <div class="users-section">
+            <h3>All Users</h3>
+            <div id="status-message"></div>
+            <div class="user-list">
+                <% if (users && users.length > 0) { %>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Email</th>
+                                <th>Name</th>
+                                <th>Role</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% users.forEach(user => { %>
+                                <tr data-user-id="<%= user.user_id %>">
+                                    <td><%= user.user_id %></td>
+                                    <td><%= user.email %></td>
+                                    <td><%= user.name %> <%= user.surname %></td>
+                                    <td><%= user.role %></td>
+                                    <td>
+                                        <button class="btn btn-edit edit-user" data-id="<%= user.user_id %>">Edit</button>
+                                        <button class="btn btn-danger delete-user" data-id="<%= user.user_id %>">Delete</button>
+                                    </td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                <% } else { %>
+                    <p>No users found.</p>
+                <% } %>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Edit User Modal -->
+    <div id="edit-user-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Edit User</h2>
+            <form id="edit-user-form">
+                <input type="hidden" id="edit-user-id">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-email">Email</label>
+                        <input type="email" id="edit-email" name="email">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="edit-password">Password (leave blank to keep current)</label>
+                        <input type="password" id="edit-password" name="password">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-name">First Name</label>
+                        <input type="text" id="edit-name" name="name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="edit-surname">Last Name</label>
+                        <input type="text" id="edit-surname" name="surname">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit-role">Role</label>
+                    <select id="edit-role" name="role">
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Update User</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<%- include('partials/footer', { customJs: 'admin' }) %>

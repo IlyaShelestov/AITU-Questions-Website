@@ -1,0 +1,30 @@
+.upload-section,
+.files-section {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: var(--box-shadow);
+}
+
+.upload-section h2,
+.files-section h2 {
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+#upload-form {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+}
+
+#upload-form .form-group {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+#upload-message {
+  margin-top: 1rem;
+}
