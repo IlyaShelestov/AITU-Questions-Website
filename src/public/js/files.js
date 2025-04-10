@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const uploadForm = document.getElementById("upload-form");
   const uploadMessage = document.getElementById("upload-message");
   const deleteButtons = document.querySelectorAll(".delete-file");
+  const fileRows = document.querySelectorAll(".file-row");
 
   if (uploadForm) {
     uploadForm.addEventListener("submit", async function (e) {
@@ -41,7 +42,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
   if (deleteButtons) {
     deleteButtons.forEach((button) => {
-      button.addEventListener("click", async function () {
+      button.addEventListener("click", async function (e) {
+        e.stopPropagation(); // Prevent row click event
         const fileId = this.getAttribute("data-id");
 
         if (confirm("Are you sure you want to delete this file?")) {
@@ -76,6 +78,19 @@ document.addEventListener("DOMContentLoaded", function () {
             alert("Error deleting file. Please try again.");
           }
         }
+      });
+    });
+  }
+
+  if (fileRows) {
+    fileRows.forEach((row) => {
+      row.addEventListener("click", function (e) {
+        if (e.target.classList.contains("delete-file")) {
+          return;
+        }
+
+        const fileId = this.getAttribute("data-file-id");
+        window.location.href = `/files/download/${fileId}`;
       });
     });
   }

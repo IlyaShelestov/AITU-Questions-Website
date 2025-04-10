@@ -1,7 +1,9 @@
 const File = require("../models/File");
+const path = require("path");
 const fs = require("fs");
 const util = require("util");
 const unlink = util.promisify(fs.unlink);
+const { simplifyMimeType, encodeFilename } = require("../utils/fileHelpers");
 
 exports.renderFilesPage = async (req, res) => {
   try {
@@ -27,20 +29,46 @@ exports.uploadFile = async (req, res) => {
 
     const { originalname, mimetype, size, path: filePath } = req.file;
     const { name, surname } = req.user;
+    const simplifiedType = simplifyMimeType(mimetype);
+    const existingFile = await File.findByName(originalname);
 
-    const file = await File.create(
-      originalname,
-      size,
-      mimetype,
-      filePath,
-      name,
-      surname
-    );
+    if (existingFile) {
+      const oldFile = await File.findById(existingFile.file_id);
+      if (oldFile && oldFile.path) {
+        try {
+          await unlink(oldFile.path);
+        } catch (err) {
+          console.error("Error deleting existing file:", err);
+        }
+      }
 
-    return res.status(201).json({
-      message: "File uploaded successfully",
-      file,
-    });
+      const updatedFile = await File.update(
+        existingFile.file_id,
+        originalname,
+        size,
+        simplifiedType,
+        filePath
+      );
+
+      return res.status(200).json({
+        message: "File replaced successfully",
+        file: updatedFile,
+      });
+    } else {
+      const file = await File.create(
+        originalname,
+        size,
+        simplifiedType,
+        filePath,
+        name,
+        surname
+      );
+
+      return res.status(201).json({
+        message: "File uploaded successfully",
+        file,
+      });
+    }
   } catch (error) {
     console.error("Error uploading file:", error);
     return res.status(500).json({ error: "File upload failed" });
@@ -67,5 +95,45 @@ exports.deleteFile = async (req, res) => {
   } catch (error) {
     console.error("Error deleting file:", error);
     return res.status(500).json({ error: "File deletion failed" });
+  }
+};
+
+exports.downloadFile = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const file = await File.findById(id);
+
+    if (!file) {
+      return res.status(404).render("error", {
+        message: "File not found",
+      });
+    }
+
+    const fileInfo = await File.getFileInfo(id);
+
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; ${encodeFilename(fileInfo.file_name)}`
+    );
+
+    const extension = path.extname(fileInfo.file_name).toLowerCase();
+    let contentType = fileInfo.type;
+
+    if (extension === ".docx") {
+      contentType =
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+    } else if (extension === ".xlsx") {
+      contentType =
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+    }
+
+    res.setHeader("Content-Type", contentType);
+
+    return res.download(file.path, fileInfo.file_name);
+  } catch (error) {
+    console.error("Error downloading file:", error);
+    return res.status(500).render("error", {
+      message: "Error downloading file",
+    });
   }
 };

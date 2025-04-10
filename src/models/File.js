@@ -23,6 +23,17 @@ class File {
     return rows[0];
   }
 
+  static async getFileInfo(id) {
+    const query = `
+            SELECT file_id, file_name, size, type, path
+            FROM files
+            WHERE file_id = $1;
+        `;
+    const values = [id];
+    const { rows } = await pool.query(query, values);
+    return rows[0];
+  }
+
   static async findByName(file_name) {
     const query = `
             SELECT file_id

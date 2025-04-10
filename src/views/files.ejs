@@ -31,7 +31,7 @@
                     </thead>
                     <tbody>
                         <% files.forEach(file => { %>
-                            <tr data-file-id="<%= file.file_id %>">
+                            <tr data-file-id="<%= file.file_id %>" class="file-row">
                                 <td><%= file.file_name %></td>
                                 <td><%= (file.size / 1024).toFixed(2) %> KB</td>
                                 <td><%= file.type %></td>

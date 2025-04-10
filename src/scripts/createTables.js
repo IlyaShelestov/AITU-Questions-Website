@@ -26,7 +26,7 @@ async function createTables(pool) {
         CREATE TABLE IF NOT EXISTS files (
           file_id SERIAL PRIMARY KEY,
           file_name VARCHAR(255) NOT NULL,
-          type VARCHAR(50) NOT NULL,
+          type VARCHAR(255) NOT NULL,
           size INT NOT NULL,
           path VARCHAR(255) NOT NULL,
           user_name VARCHAR(255) NOT NULL,

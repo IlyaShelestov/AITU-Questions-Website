@@ -28,3 +28,16 @@
 #upload-message {
   margin-top: 1rem;
 }
+
+.file-row {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.file-row:hover {
+  background-color: var(--secondary-color);
+}
+
+.file-row td:last-child {
+  cursor: default;
+}
