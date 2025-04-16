@@ -16,12 +16,13 @@
 
 #upload-form {
   display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
   align-items: flex-end;
 }
 
 #upload-form .form-group {
-  flex: 1;
+  flex: 1 1 300px;
   margin-bottom: 0;
 }
 
@@ -40,4 +41,24 @@
 
 .file-row td:last-child {
   cursor: default;
+}
+
+.filters {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: var(--light-bg);
+  border-radius: 4px;
+}
+
+.filters .form-group {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .filters {
+    flex-direction: column;
+  }
 }

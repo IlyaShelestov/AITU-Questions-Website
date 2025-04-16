@@ -10,6 +10,14 @@
                 <label for="file">Select File</label>
                 <input type="file" id="file" name="file" required>
             </div>
+            <div class="form-group">
+                <label for="audience">Available For</label>
+                <select id="audience" name="audience" required>
+                    <option value="students">Students Only</option>
+                    <option value="staff">Staff Only</option>
+                    <option value="both">Both Students and Staff</option>
+                </select>
+            </div>
             <button type="submit" class="btn btn-primary">Upload</button>
         </form>
         <div id="upload-message"></div>
@@ -17,25 +25,64 @@
     
     <div class="files-section">
         <h2>Your Files</h2>
+        
+        <div class="filters">
+            <div class="form-group">
+                <label for="filter-type">Filter by Type</label>
+                <select id="filter-type">
+                    <option value="all">All Types</option>
+                    <% if (fileTypes && fileTypes.length > 0) { %>
+                        <% fileTypes.forEach(type => { %>
+                            <option value="<%= type %>"><%= type %></option>
+                        <% }); %>
+                    <% } %>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="filter-audience">Filter by Audience</label>
+                <select id="filter-audience">
+                    <option value="all">All</option>
+                    <option value="students">Students Only</option>
+                    <option value="staff">Staff Only</option>
+                    <option value="both">Both</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="filter-uploader">Uploaded By</label>
+                <select id="filter-uploader">
+                    <option value="all">All Users</option>
+                    <% if (uploaders && uploaders.length > 0) { %>
+                        <% uploaders.forEach(uploader => { %>
+                            <option value="<%= uploader %>"><%= uploader %></option>
+                        <% }); %>
+                    <% } %>
+                </select>
+            </div>
+        </div>
+        
         <div class="file-list">
             <% if (files && files.length > 0) { %>
-                <table>
+                <table id="files-table">
                     <thead>
                         <tr>
                             <th>Name</th>
                             <th>Size</th>
                             <th>Type</th>
                             <th>Uploaded by</th>
+                            <th>Audience</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         <% files.forEach(file => { %>
-                            <tr data-file-id="<%= file.file_id %>" class="file-row">
+                            <tr data-file-id="<%= file.file_id %>" class="file-row" data-type="<%= file.type %>" data-audience="<%= file.audience %>">
                                 <td><%= file.file_name %></td>
                                 <td><%= (file.size / 1024).toFixed(2) %> KB</td>
                                 <td><%= file.type %></td>
                                 <td><%= file.user_name %> <%= file.user_surname %></td>
+                                <td><%= file.audience === 'both' ? 'Students & Staff' : (file.audience === 'students' ? 'Students' : 'Staff') %></td>
                                 <td>
                                     <button class="btn btn-danger delete-file" data-id="<%= file.file_id %>">Delete</button>
                                 </td>

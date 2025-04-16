@@ -3,7 +3,9 @@ const path = require("path");
 const fs = require("fs");
 const util = require("util");
 const unlink = util.promisify(fs.unlink);
+const rename = util.promisify(fs.rename);
 const { simplifyMimeType } = require("../utils/fileHelpers");
+const { staffDir, studentsDir } = require("../utils/multer");
 
 function sanitizeFilenameForContentDisposition(filename) {
   let sanitized = filename
@@ -20,10 +22,17 @@ function sanitizeFilenameForContentDisposition(filename) {
 exports.renderFilesPage = async (req, res) => {
   try {
     const files = await File.findAll();
+    const fileTypes = [...new Set(files.map((file) => file.type))];
+    const uploaders = [
+      ...new Set(files.map((file) => `${file.user_name} ${file.user_surname}`)),
+    ];
+
     res.render("files", {
       title: "Files Management",
       user: req.user,
       files,
+      fileTypes,
+      uploaders,
     });
   } catch (error) {
     console.error("Error fetching files:", error);
@@ -39,6 +48,11 @@ exports.uploadFile = async (req, res) => {
       return res.status(400).json({ error: "No file uploaded" });
     }
 
+    const { audience } = req.body;
+    if (!audience || !["students", "staff", "both"].includes(audience)) {
+      return res.status(400).json({ error: "Invalid audience selection" });
+    }
+
     let originalname = req.file.originalname;
 
     try {
@@ -50,9 +64,24 @@ exports.uploadFile = async (req, res) => {
       console.log("Could not decode filename:", decodeErr);
     }
 
-    const { mimetype, size, path: filePath } = req.file;
+    const { mimetype, size, path: tempPath } = req.file;
     const { name, surname } = req.user;
     const simplifiedType = simplifyMimeType(mimetype);
+
+    let finalPath;
+    const filename = path.basename(tempPath);
+
+    if (audience === "students") {
+      finalPath = path.join(studentsDir, filename);
+    } else if (audience === "staff") {
+      finalPath = path.join(staffDir, filename);
+    } else {
+      finalPath = path.join(staffDir, filename);
+    }
+
+    if (tempPath !== finalPath) {
+      await rename(tempPath, finalPath);
+    }
 
     const existingFile = await File.findByName(originalname);
 
@@ -71,7 +100,8 @@ exports.uploadFile = async (req, res) => {
         originalname,
         size,
         simplifiedType,
-        filePath
+        finalPath,
+        audience
       );
 
       return res.status(200).json({
@@ -83,9 +113,10 @@ exports.uploadFile = async (req, res) => {
         originalname,
         size,
         simplifiedType,
-        filePath,
+        finalPath,
         name,
-        surname
+        surname,
+        audience
       );
 
       return res.status(201).json({

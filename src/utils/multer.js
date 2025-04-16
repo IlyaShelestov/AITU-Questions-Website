@@ -2,23 +2,25 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 
-const uploadDir = process.env.FILES_DIR || "files";
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+const staffDir = process.env.FILES_DIR_STAFF || "files/staff";
+const studentsDir = process.env.FILES_DIR_STUDENTS || "files/students";
+
+[staffDir, studentsDir].forEach((dir) => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+});
 
 const allowedExtensions = [".docx", ".xlsx", ".pdf"];
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, uploadDir);
+    cb(null, staffDir);
   },
   filename: (req, file, cb) => {
     const extension = path.extname(file.originalname);
-
     const originalNameWithoutExt = path.basename(file.originalname, extension);
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-
     cb(null, uniqueSuffix + "-" + originalNameWithoutExt + extension);
   },
 });
@@ -41,4 +43,6 @@ const upload = multer({
 
 module.exports = {
   upload,
+  staffDir,
+  studentsDir,
 };

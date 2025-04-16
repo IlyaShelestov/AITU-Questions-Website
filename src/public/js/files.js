@@ -3,6 +3,45 @@ document.addEventListener("DOMContentLoaded", function () {
   const uploadMessage = document.getElementById("upload-message");
   const deleteButtons = document.querySelectorAll(".delete-file");
   const fileRows = document.querySelectorAll(".file-row");
+  const filterType = document.getElementById("filter-type");
+  const filterAudience = document.getElementById("filter-audience");
+  const filterUploader = document.getElementById("filter-uploader");
+
+  function applyFilters() {
+    const typeFilter = filterType.value;
+    const audienceFilter = filterAudience.value;
+    const uploaderFilter = filterUploader.value;
+
+    document.querySelectorAll("#files-table tbody tr").forEach((row) => {
+      const rowType = row.getAttribute("data-type");
+      const rowAudience = row.getAttribute("data-audience");
+      const rowUploader = row.getAttribute("data-uploader");
+
+      const typeMatch = typeFilter === "all" || rowType === typeFilter;
+      const audienceMatch =
+        audienceFilter === "all" || rowAudience === audienceFilter;
+      const uploaderMatch =
+        uploaderFilter === "all" || rowUploader === uploaderFilter;
+
+      if (typeMatch && audienceMatch && uploaderMatch) {
+        row.style.display = "";
+      } else {
+        row.style.display = "none";
+      }
+    });
+  }
+
+  if (filterType) {
+    filterType.addEventListener("change", applyFilters);
+  }
+
+  if (filterAudience) {
+    filterAudience.addEventListener("change", applyFilters);
+  }
+
+  if (filterUploader) {
+    filterUploader.addEventListener("change", applyFilters);
+  }
 
   if (uploadForm) {
     uploadForm.addEventListener("submit", async function (e) {
@@ -43,7 +82,7 @@ document.addEventListener("DOMContentLoaded", function () {
   if (deleteButtons) {
     deleteButtons.forEach((button) => {
       button.addEventListener("click", async function (e) {
-        e.stopPropagation(); // Prevent row click event
+        e.stopPropagation();
         const fileId = this.getAttribute("data-id");
 
         if (confirm("Are you sure you want to delete this file?")) {
