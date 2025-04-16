@@ -3,6 +3,7 @@
 <div class="container">
     <h1>Files Management</h1>
     
+    <% if (user.role === 'admin' || user.role === 'manager') { %>
     <div class="upload-section">
         <h2>Upload New File</h2>
         <form id="upload-form" enctype="multipart/form-data">
@@ -22,6 +23,7 @@
         </form>
         <div id="upload-message"></div>
     </div>
+    <% } %>
     
     <div class="files-section">
         <h2>Your Files</h2>
@@ -72,7 +74,9 @@
                             <th>Type</th>
                             <th>Uploaded by</th>
                             <th>Audience</th>
+                            <% if (user.role === 'admin' || user.role === 'manager') { %>
                             <th>Actions</th>
+                            <% } %>
                         </tr>
                     </thead>
                     <tbody>
@@ -83,9 +87,11 @@
                                 <td><%= file.type %></td>
                                 <td><%= file.user_name %> <%= file.user_surname %></td>
                                 <td><%= file.audience === 'both' ? 'Students & Staff' : (file.audience === 'students' ? 'Students' : 'Staff') %></td>
+                                <% if (user.role === 'admin' || user.role === 'manager') { %>
                                 <td>
                                     <button class="btn btn-danger delete-file" data-id="<%= file.file_id %>">Delete</button>
                                 </td>
+                                <% } %>
                             </tr>
                         <% }); %>
                     </tbody>

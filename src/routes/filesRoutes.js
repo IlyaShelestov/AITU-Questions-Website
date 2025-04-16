@@ -7,10 +7,11 @@ const {
   downloadFile,
 } = require("../controllers/filesController");
 const { upload } = require("../utils/multer");
+const { isManager } = require("../middlewares/authMiddleware");
 
 router.get("/", renderFilesPage);
-router.post("/upload", upload.single("file"), uploadFile);
-router.delete("/:id", deleteFile);
+router.post("/upload", isManager, upload.single("file"), uploadFile);
+router.delete("/:id", isManager, deleteFile);
 router.get("/download/:id", downloadFile);
 
 module.exports = router;

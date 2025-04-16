@@ -21,6 +21,13 @@ exports.isAdmin = (req, res, next) => {
   next();
 };
 
+exports.isManager = (req, res, next) => {
+  if (req.user.role !== "manager" && req.user.role !== "admin") {
+    return res.status(403).json({ message: "Forbidden" });
+  }
+  next();
+};
+
 exports.preventLoggedIn = (req, res, next) => {
   const token = req.cookies.token;
   if (token) {

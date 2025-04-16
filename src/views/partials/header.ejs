@@ -15,8 +15,8 @@
         <% if (locals.user) { %>
             <nav>
                 <ul>
-                    <li><a href="/files">Files</a></li>
                     <li><a href="/chat">Chat</a></li>
+                    <li><a href="/files">Files</a></li>
                     <% if (user.role === 'admin') { %>
                         <li><a href="/admin">Admin</a></li>
                     <% } %>
