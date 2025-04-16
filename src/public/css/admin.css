@@ -5,6 +5,30 @@
   padding: 2rem;
 }
 
+.admin-nav {
+  display: flex;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.admin-nav .nav-item {
+  padding: 1rem 1.5rem;
+  text-decoration: none;
+  color: var(--text-color);
+  font-weight: 500;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s;
+}
+
+.admin-nav .nav-item:hover {
+  background-color: var(--secondary-color);
+}
+
+.admin-nav .nav-item.active {
+  border-bottom-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
 .user-management {
   margin-top: 2rem;
 }

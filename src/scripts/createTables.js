@@ -38,6 +38,20 @@ async function createTables(pool) {
         );
       `);
     await pool.query(`
+        CREATE TABLE IF NOT EXISTS user_actions (
+          action_id SERIAL PRIMARY KEY,
+          user_id INTEGER REFERENCES users(user_id),
+          user_name VARCHAR(255) NOT NULL,
+          user_surname VARCHAR(255) NOT NULL,
+          action_type VARCHAR(50) NOT NULL,
+          resource_type VARCHAR(50) NOT NULL,
+          resource_id INTEGER,
+          resource_name VARCHAR(255),
+          details TEXT,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+    await pool.query(`
         CREATE TRIGGER set_modified_users
         BEFORE UPDATE ON users
         FOR EACH ROW

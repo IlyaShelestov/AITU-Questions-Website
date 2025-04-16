@@ -12,6 +12,7 @@ const authRoutes = require("./routes/authRoutes");
 const filesRoutes = require("./routes/filesRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const chatRoutes = require("./routes/chatRoutes");
+const userActionsRoutes = require("./routes/userActionsRoutes");
 
 const app = express();
 
@@ -89,6 +90,7 @@ app.use("/auth", authRoutes);
 app.use("/files", verifyToken, filesRoutes);
 app.use("/chat", verifyToken, chatRoutes);
 app.use("/admin", verifyToken, isAdmin, adminRoutes);
+app.use("/admin/actions", verifyToken, isAdmin, userActionsRoutes);
 
 const PORT = process.env.PORT || 5000;
 

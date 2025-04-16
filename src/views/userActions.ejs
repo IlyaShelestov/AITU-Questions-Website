@@ -1,0 +1,135 @@
+<%- include('partials/header', { title: 'User Actions Panel', customCss: 'userActions' }) %>
+
+<div class="actions-container">
+    <h1>User Actions Panel</h1>
+
+    <div class="admin-nav">
+        <a href="/admin" class="nav-item">User Management</a>
+        <a href="/admin/actions" class="nav-item active">User Actions</a>
+    </div>
+    
+    <div class="actions-filter">
+        <h2>Filter Actions</h2>
+        <form id="filter-form" method="GET" action="/admin/actions">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="actionType">Action Type</label>
+                    <select id="actionType" name="actionType">
+                        <option value="">All Actions</option>
+                        <% actionTypes.forEach(type => { %>
+                            <option value="<%= type %>" <%= filters.actionType === type ? 'selected' : '' %>>
+                                <%= type.charAt(0).toUpperCase() + type.slice(1) %>
+                            </option>
+                        <% }); %>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="userId">User</label>
+                    <select id="userId" name="userId">
+                        <option value="">All Users</option>
+                        <% users.forEach(user => { %>
+                            <option value="<%= user.user_id %>" <%= filters.userId === user.user_id.toString() ? 'selected' : '' %>>
+                                <%= user.name %> <%= user.surname %>
+                            </option>
+                        <% }); %>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="startDate">Start Date</label>
+                    <input type="date" id="startDate" name="startDate" value="<%= filters.startDate || '' %>">
+                </div>
+                
+                <div class="form-group">
+                    <label for="endDate">End Date</label>
+                    <input type="date" id="endDate" name="endDate" value="<%= filters.endDate || '' %>">
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button type="submit" class="btn btn-primary">Apply Filters</button>
+                <a href="/admin/actions" class="btn btn-secondary">Clear Filters</a>
+            </div>
+        </form>
+    </div>
+    
+    <div class="actions-list">
+        <h2>Activity Logs</h2>
+        
+        <% if (actions && actions.length > 0) { %>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Resource</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% actions.forEach(action => { %>
+                        <tr>
+                            <td>
+                                <%= new Date(action.created_at).toLocaleString('en-US', {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    hour12: true
+                                }) %>
+                            </td>
+                            <td><%= action.user_name %> <%= action.user_surname %></td>
+                            <td class="action-type action-<%= action.action_type %>">
+                                <%= action.action_type.charAt(0).toUpperCase() + action.action_type.slice(1) %>
+                            </td>
+                            <td>
+                                <%= action.resource_name %>
+                                <small>(<%= action.resource_type %>)</small>
+                            </td>
+                            <td><%= action.details %></td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+            
+            <!-- Pagination -->
+            <% if (pagination.total > 1) { %>
+                <div class="pagination">
+                    <% if (pagination.prev) { %>
+                        <a href="?page=<%= pagination.prev %>&<%= 
+                            Object.entries(filters)
+                                .filter(([key]) => key !== 'page')
+                                .map(([key, value]) => `${key}=${value}`)
+                                .join('&') 
+                        %>" class="btn btn-secondary">Previous</a>
+                    <% } %>
+                    
+                    <span class="pagination-info">Page <%= pagination.current %> of <%= pagination.total %></span>
+                    
+                    <% if (pagination.next) { %>
+                        <a href="?page=<%= pagination.next %>&<%= 
+                            Object.entries(filters)
+                                .filter(([key]) => key !== 'page')
+                                .map(([key, value]) => `${key}=${value}`)
+                                .join('&') 
+                        %>" class="btn btn-secondary">Next</a>
+                    <% } %>
+                </div>
+            <% } %>
+        <% } else { %>
+            <div class="empty-state">
+                <p>No user actions found.</p>
+                <% if (Object.keys(filters).length > 0) { %>
+                    <p>Try clearing the filters to see all actions.</p>
+                <% } %>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<%- include('partials/footer') %>

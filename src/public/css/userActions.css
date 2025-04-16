@@ -1,0 +1,100 @@
+.actions-container {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: var(--box-shadow);
+  padding: 2rem;
+}
+
+.actions-filter,
+.actions-list {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background-color: var(--light-bg);
+  border-radius: 8px;
+}
+
+.actions-filter h2,
+.actions-list h2 {
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.button-group {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.action-type {
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.action-upload {
+  background-color: rgba(76, 175, 80, 0.1);
+  color: #2e7d32;
+}
+
+.action-download {
+  background-color: rgba(33, 150, 243, 0.1);
+  color: #1565c0;
+}
+
+.action-delete {
+  background-color: rgba(244, 67, 54, 0.1);
+  color: #c62828;
+}
+
+.action-replace {
+  background-color: rgba(255, 152, 0, 0.1);
+  color: #ef6c00;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 2rem;
+  gap: 1rem;
+}
+
+.pagination-info {
+  font-weight: 500;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 0;
+  color: var(--light-text);
+}
+
+table td {
+  vertical-align: top;
+}
+
+.admin-nav {
+  display: flex;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.admin-nav .nav-item {
+  padding: 1rem 1.5rem;
+  text-decoration: none;
+  color: var(--text-color);
+  font-weight: 500;
+  border-bottom: 3px solid transparent;
+  transition: all 0.2s;
+}
+
+.admin-nav .nav-item:hover {
+  background-color: var(--secondary-color);
+}
+
+.admin-nav .nav-item.active {
+  border-bottom-color: var(--primary-color);
+  color: var(--primary-color);
+}

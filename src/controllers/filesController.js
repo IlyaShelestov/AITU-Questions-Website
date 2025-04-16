@@ -1,4 +1,5 @@
 const File = require("../models/File");
+const UserAction = require("../models/UserAction");
 const path = require("path");
 const fs = require("fs");
 const util = require("util");
@@ -65,7 +66,7 @@ exports.uploadFile = async (req, res) => {
     }
 
     const { mimetype, size, path: tempPath } = req.file;
-    const { name, surname } = req.user;
+    const { id, name, surname } = req.user;
     const simplifiedType = simplifyMimeType(mimetype);
 
     let finalPath;
@@ -104,6 +105,20 @@ exports.uploadFile = async (req, res) => {
         audience
       );
 
+      // Log the file replacement action
+      await UserAction.create(
+        id,
+        name,
+        surname,
+        "replace",
+        "file",
+        existingFile.file_id,
+        originalname,
+        `File replaced. Size: ${(size / 1024).toFixed(
+          2
+        )} KB, Type: ${simplifiedType}, Audience: ${audience}`
+      );
+
       return res.status(200).json({
         message: "File replaced successfully",
         file: updatedFile,
@@ -119,6 +134,20 @@ exports.uploadFile = async (req, res) => {
         audience
       );
 
+      // Log the file upload action
+      await UserAction.create(
+        id,
+        name,
+        surname,
+        "upload",
+        "file",
+        file.file_id,
+        originalname,
+        `File uploaded. Size: ${(size / 1024).toFixed(
+          2
+        )} KB, Type: ${simplifiedType}, Audience: ${audience}`
+      );
+
       return res.status(201).json({
         message: "File uploaded successfully",
         file,
@@ -132,19 +161,33 @@ exports.uploadFile = async (req, res) => {
 
 exports.deleteFile = async (req, res) => {
   try {
-    const { id } = req.params;
-    const file = await File.findById(id);
+    const { id: fileId } = req.params;
+    const file = await File.findById(fileId);
 
     if (!file) {
       return res.status(404).json({ error: "File not found" });
     }
 
-    const deletedFile = await File.delete(id);
+    const fileInfo = await File.getFileInfo(fileId);
+    const deletedFile = await File.delete(fileId);
+
     if (!deletedFile) {
       return res.status(404).json({ error: "File not found" });
     }
 
     await unlink(file.path);
+
+    // Log the file deletion action
+    await UserAction.create(
+      req.user.id,
+      req.user.name,
+      req.user.surname,
+      "delete",
+      "file",
+      fileId,
+      fileInfo.file_name,
+      `File deleted. Type: ${fileInfo.type}, Audience: ${fileInfo.audience}`
+    );
 
     return res.status(200).json({ message: "File deleted successfully" });
   } catch (error) {
@@ -155,8 +198,8 @@ exports.deleteFile = async (req, res) => {
 
 exports.downloadFile = async (req, res) => {
   try {
-    const { id } = req.params;
-    const fileRow = await File.findById(id);
+    const { id: fileId } = req.params;
+    const fileRow = await File.findById(fileId);
 
     if (!fileRow) {
       return res.status(404).render("error", {
@@ -164,12 +207,24 @@ exports.downloadFile = async (req, res) => {
       });
     }
 
-    const fileInfo = await File.getFileInfo(id);
+    const fileInfo = await File.getFileInfo(fileId);
     if (!fileInfo) {
       return res.status(404).render("error", {
         message: "File not found",
       });
     }
+
+    // Log the file download action
+    await UserAction.create(
+      req.user.id,
+      req.user.name,
+      req.user.surname,
+      "download",
+      "file",
+      fileId,
+      fileInfo.file_name,
+      `File downloaded. Type: ${fileInfo.type}, Audience: ${fileInfo.audience}`
+    );
 
     const sanitizedFilename = sanitizeFilenameForContentDisposition(
       fileInfo.file_name
