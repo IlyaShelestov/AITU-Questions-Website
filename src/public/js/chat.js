@@ -3,6 +3,24 @@ document.addEventListener("DOMContentLoaded", function () {
   const messageInput = document.getElementById("message-input");
   const messagesContainer = document.getElementById("messages");
   const chatBox = document.getElementById("chat-box");
+  const mermaidScript = document.createElement("script");
+  mermaidScript.src =
+    "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
+  document.head.appendChild(mermaidScript);
+
+  mermaidScript.onload = function () {
+    mermaid.initialize({ startOnLoad: true });
+  };
+
+  let sessionId = localStorage.getItem("chatSessionId");
+  if (!sessionId) {
+    sessionId =
+      "session_" +
+      Date.now() +
+      "_" +
+      Math.random().toString(36).substring(2, 12);
+    localStorage.setItem("chatSessionId", sessionId);
+  }
 
   function addMessage(content, isUser = true) {
     const messageDiv = document.createElement("div");
@@ -10,7 +28,28 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const contentDiv = document.createElement("div");
     contentDiv.className = "message-content";
-    contentDiv.textContent = content;
+
+    if (!isUser && typeof content === "object" && content.mermaid) {
+      const mermaidDiv = document.createElement("div");
+      mermaidDiv.className = "mermaid";
+      mermaidDiv.textContent = content.mermaid;
+      contentDiv.appendChild(mermaidDiv);
+
+      if (content.sources && content.sources.length > 0) {
+        const sourcesDiv = document.createElement("div");
+        sourcesDiv.className = "sources";
+        sourcesDiv.innerHTML =
+          "<strong>Sources:</strong><br>" +
+          content.sources.map((source) => `- ${source}`).join("<br>");
+        contentDiv.appendChild(sourcesDiv);
+      }
+
+      setTimeout(() => {
+        mermaid.init(undefined, ".mermaid");
+      }, 100);
+    } else {
+      contentDiv.textContent = content;
+    }
 
     const timeDiv = document.createElement("div");
     timeDiv.className = "message-time";
@@ -40,24 +79,63 @@ document.addEventListener("DOMContentLoaded", function () {
       messageInput.value = "";
 
       try {
-        const response = await fetch("/chat/send", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ message }),
-        });
+        if (message.startsWith("/flowchart ")) {
+          const flowchartQuery = message.substring("/flowchart ".length);
 
-        const result = await response.json();
+          const loadingMessage = document.createElement("div");
+          loadingMessage.className = "message ai";
+          loadingMessage.innerHTML =
+            "<div class='message-content'>Generating flowchart...</div>";
+          messagesContainer.appendChild(loadingMessage);
+          chatBox.scrollTop = chatBox.scrollHeight;
 
-        if (response.ok && result.answer) {
-          addMessage(result.answer, false);
+          const response = await fetch("/chat/flowchart", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              message: flowchartQuery,
+              sessionId,
+            }),
+          });
+
+          const result = await response.json();
+
+          messagesContainer.removeChild(loadingMessage);
+
+          if (response.ok && result.mermaid) {
+            addMessage(result, false);
+          } else {
+            addMessage(
+              "Sorry, I encountered an error generating the flowchart.",
+              false
+            );
+            console.error("API error:", result.error);
+          }
         } else {
-          addMessage(
-            "Sorry, I encountered an error processing your request.",
-            false
-          );
-          console.error("API error:", result.error);
+          const response = await fetch("/chat/send", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              message,
+              sessionId,
+            }),
+          });
+
+          const result = await response.json();
+
+          if (response.ok && result.answer) {
+            addMessage(result.answer, false);
+          } else {
+            addMessage(
+              "Sorry, I encountered an error processing your request.",
+              false
+            );
+            console.error("API error:", result.error);
+          }
         }
       } catch (error) {
         console.error("Chat error:", error);
@@ -65,6 +143,24 @@ document.addEventListener("DOMContentLoaded", function () {
           "Sorry, I encountered an error processing your request.",
           false
         );
+      }
+    });
+  }
+
+  const clearButton = document.getElementById("clear-chat");
+  if (clearButton) {
+    clearButton.addEventListener("click", async () => {
+      try {
+        await fetch("/chat/clear", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ sessionId }),
+        });
+        messagesContainer.innerHTML = "";
+      } catch (error) {
+        console.error("Error clearing chat history:", error);
       }
     });
   }
