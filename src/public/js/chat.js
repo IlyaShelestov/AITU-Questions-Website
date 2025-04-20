@@ -12,14 +12,22 @@ document.addEventListener("DOMContentLoaded", function () {
     mermaid.initialize({ startOnLoad: true });
   };
 
-  let sessionId = localStorage.getItem("chatSessionId");
-  if (!sessionId) {
-    sessionId =
-      "session_" +
-      Date.now() +
-      "_" +
-      Math.random().toString(36).substring(2, 12);
+  let sessionId;
+  const serverSessionId = chatBox.dataset.sessionId;
+
+  if (serverSessionId) {
+    sessionId = serverSessionId;
     localStorage.setItem("chatSessionId", sessionId);
+  } else {
+    sessionId = localStorage.getItem("chatSessionId");
+    if (!sessionId) {
+      sessionId =
+        "session_" +
+        Date.now() +
+        "_" +
+        Math.random().toString(36).substring(2, 12);
+      localStorage.setItem("chatSessionId", sessionId);
+    }
   }
 
   function addMessage(content, isUser = true) {
@@ -70,10 +78,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const timeDiv = document.createElement("div");
     timeDiv.className = "message-time";
     const now = new Date();
-    timeDiv.textContent = `${now.getHours().toString().padStart(2, "0")}:${now
-      .getMinutes()
-      .toString()
-      .padStart(2, "0")}`;
+    timeDiv.textContent = now.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
 
     messageDiv.appendChild(contentDiv);
     messageDiv.appendChild(timeDiv);

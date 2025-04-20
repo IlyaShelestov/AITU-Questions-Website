@@ -1,38 +1,43 @@
 <%- include('partials/header', { title: 'Chat with AI', customCss: 'chat' }) %>
 
 <div class="chat-container">
-    <h1>Chat with AI</h1>
-    
-    <div class="chat-box" id="chat-box">
-        <div class="welcome-message">
-            <p>Welcome to AITU Questions Chat!</p>
-            <p>Ask anything about your studies, and our AI will try to help you.</p>
-            <p>Type <code>/flowchart your question</code> to generate a flowchart diagram.</p>
-        </div>
-        
-        <div id="messages">
-            <% if (messages && messages.length > 0) { %>
-                <% messages.forEach(msg => { %>
-                    <div class="message <%= msg.isUser ? 'user' : 'ai' %>">
-                        <div class="message-content">
-                            <%= msg.content %>
-                        </div>
-                        <div class="message-time">
-                            <%= msg.timestamp %>
-                        </div>
-                    </div>
-                <% }); %>
-            <% } %>
-        </div>
+  <h1>Chat with AI</h1>
+
+  <div class="chat-box" id="chat-box" data-session-id="<%= sessionId %>">
+    <div class="welcome-message">
+      <p>Welcome to AITU Questions Chat!</p>
+      <p>Ask anything about your studies, and our AI will try to help you.</p>
+      <p>
+        Type <code>/flowchart your question</code> to generate a flowchart
+        diagram.
+      </p>
     </div>
-    
-    <div class="chat-input">
-        <form id="chat-form">
-            <input type="text" id="message-input" placeholder="Type your question here..." autofocus>
-            <button type="submit" class="btn btn-primary">Send</button>
-            <button type="button" id="clear-chat" class="btn btn-danger">Clear</button>
-        </form>
+
+    <div id="messages">
+      <% if (messages && messages.length > 0) { %> <% messages.forEach(msg => {
+      %>
+      <div class="message <%= msg.isUser ? 'user' : 'ai' %>">
+        <div class="message-content"><%= msg.content %></div>
+        <div class="message-time"><%= msg.timestamp %></div>
+      </div>
+      <% }); %> <% } %>
     </div>
+  </div>
+
+  <div class="chat-input">
+    <form id="chat-form">
+      <input
+        type="text"
+        id="message-input"
+        placeholder="Type your question here..."
+        autofocus
+      />
+      <button type="submit" class="btn btn-primary">Send</button>
+      <button type="button" id="clear-chat" class="btn btn-danger">
+        Clear
+      </button>
+    </form>
+  </div>
 </div>
 
 <%- include('partials/footer', { customJs: 'chat' }) %>

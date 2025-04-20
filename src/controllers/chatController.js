@@ -4,12 +4,53 @@ const { getMermaidImageUrl } = require("../utils/krokiClient");
 
 const llmClient = new LlmApiClient(process.env.LLM_API_URL);
 
-exports.renderChatPage = (req, res) => {
-  res.render("chat", {
-    title: "Chat with AI",
-    user: req.user,
-    messages: [],
-  });
+exports.renderChatPage = async (req, res) => {
+  try {
+    let sessionId = req.cookies.chatSessionId;
+    if (!sessionId) {
+      sessionId = `session_${Date.now()}_${Math.random()
+        .toString(36)
+        .substring(2, 12)}`;
+      res.cookie("chatSessionId", sessionId, {
+        maxAge: 24 * 60 * 60 * 1000,
+        httpOnly: true,
+      });
+    }
+
+    let messages = [];
+    try {
+      const historyData = await llmClient.getChatHistory(sessionId);
+      if (
+        historyData &&
+        historyData.history &&
+        historyData.history.length > 0
+      ) {
+        messages = historyData.history.map((msg) => ({
+          content: msg.content,
+          isUser: msg.role === "user",
+          timestamp: new Date().toLocaleTimeString("en-US", {
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+          }),
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching chat history:", error);
+    }
+
+    res.render("chat", {
+      title: "Chat with AI",
+      user: req.user,
+      messages: messages,
+      sessionId: sessionId,
+    });
+  } catch (error) {
+    console.error("Error rendering chat page:", error);
+    res.status(500).render("error", {
+      message: "Error loading chat page",
+    });
+  }
 };
 
 exports.sendMessage = async (req, res) => {
