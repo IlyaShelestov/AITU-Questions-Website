@@ -59,6 +59,18 @@ class LlmApiClient {
     }
   }
 
+  async getChatHistory(sessionId = "default") {
+    try {
+      const response = await this.axios.get(
+        `/api/teacher/chat/history?session_id=${sessionId}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching chat history:", error);
+      throw new Error("Failed to fetch chat history");
+    }
+  }
+
   async generateFlowchart(query, sessionId = "default") {
     try {
       const response = await this.axios.post("/api/teacher/flowchart", {

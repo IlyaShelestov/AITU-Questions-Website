@@ -63,6 +63,9 @@
 .chat-input {
   padding: 1.5rem;
   border-top: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .chat-input form {

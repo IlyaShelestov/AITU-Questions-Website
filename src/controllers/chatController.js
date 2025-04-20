@@ -20,7 +20,6 @@ exports.sendMessage = async (req, res) => {
       return res.status(400).json({ error: "Message is required" });
     }
 
-    console.log(sessionId);
     const response = await llmClient.sendMessage(
       message,
       sessionId || "default"
