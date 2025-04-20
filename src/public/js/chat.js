@@ -39,7 +39,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (!isUser && typeof content === "object" && content.mermaid) {
       if (content.imageUrl) {
-        // Create a container for better image handling
         const imgContainer = document.createElement("div");
         imgContainer.className = "mermaid-image-container";
 
@@ -158,6 +157,13 @@ document.addEventListener("DOMContentLoaded", function () {
             console.error("API error:", result.error);
           }
         } else {
+          const loadingMessage = document.createElement("div");
+          loadingMessage.className = "message ai";
+          loadingMessage.innerHTML =
+            "<div class='message-content'>Searching for the answer...</div>";
+          messagesContainer.appendChild(loadingMessage);
+          chatBox.scrollTop = chatBox.scrollHeight;
+
           const response = await fetch("/chat/send", {
             method: "POST",
             headers: {
@@ -171,6 +177,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
           const result = await response.json();
 
+          messagesContainer.removeChild(loadingMessage);
+
           if (response.ok && result.answer) {
             addMessage(result.answer, false);
           } else {
@@ -183,6 +191,21 @@ document.addEventListener("DOMContentLoaded", function () {
         }
       } catch (error) {
         console.error("Chat error:", error);
+
+        try {
+          const loadingMessages = document.querySelectorAll(".message.ai");
+          for (const msg of loadingMessages) {
+            if (
+              msg.textContent.includes("Searching for an answer") ||
+              msg.textContent.includes("Generating flowchart")
+            ) {
+              messagesContainer.removeChild(msg);
+            }
+          }
+        } catch (e) {
+          console.error("Error removing loading message:", e);
+        }
+
         addMessage(
           "Sorry, I encountered an error processing your request.",
           false
