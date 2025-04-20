@@ -21,7 +21,11 @@ const storage = multer.diskStorage({
     const extension = path.extname(file.originalname);
     const originalNameWithoutExt = path.basename(file.originalname, extension);
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + "-" + originalNameWithoutExt + extension);
+    const encodedName = Buffer.from(
+      originalNameWithoutExt,
+      "latin1"
+    ).toString();
+    cb(null, uniqueSuffix + "-" + encodedName + extension);
   },
 });
 
