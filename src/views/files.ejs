@@ -79,7 +79,10 @@
                     </thead>
                     <tbody>
                         <% files.forEach(file => { %>
-                            <tr data-file-id="<%= file.file_id %>" class="file-row" data-type="<%= file.type %>" data-audience="<%= file.audience %>">
+                            <tr data-file-id="<%= file.file_id %>" class="file-row" 
+                                data-type="<%= file.type %>" 
+                                data-audience="<%= file.audience %>"
+                                data-uploader="<%= file.user_name %> <%= file.user_surname %>">
                                 <td><%= file.file_name %></td>
                                 <td><%= (file.size / 1024).toFixed(2) %> KB</td>
                                 <td><%= file.type %></td>
