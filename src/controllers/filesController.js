@@ -50,7 +50,7 @@ exports.uploadFile = async (req, res) => {
     }
 
     const { audience } = req.body;
-    if (!audience || !["students", "staff", "both"].includes(audience)) {
+    if (!audience || !["students", "staff"].includes(audience)) {
       return res.status(400).json({ error: "Invalid audience selection" });
     }
 
@@ -76,15 +76,13 @@ exports.uploadFile = async (req, res) => {
       finalPath = path.join(studentsDir, filename);
     } else if (audience === "staff") {
       finalPath = path.join(staffDir, filename);
-    } else {
-      finalPath = path.join(staffDir, filename);
     }
 
     if (tempPath !== finalPath) {
       await rename(tempPath, finalPath);
     }
 
-    const existingFile = await File.findByName(originalname);
+    const existingFile = await File.findByName(originalname, audience);
 
     if (existingFile) {
       const oldFile = await File.findById(existingFile.file_id);
@@ -105,7 +103,6 @@ exports.uploadFile = async (req, res) => {
         audience
       );
 
-      // Log the file replacement action
       await UserAction.create(
         id,
         name,
@@ -134,7 +131,6 @@ exports.uploadFile = async (req, res) => {
         audience
       );
 
-      // Log the file upload action
       await UserAction.create(
         id,
         name,
@@ -177,7 +173,6 @@ exports.deleteFile = async (req, res) => {
 
     await unlink(file.path);
 
-    // Log the file deletion action
     await UserAction.create(
       req.user.id,
       req.user.name,
@@ -214,7 +209,6 @@ exports.downloadFile = async (req, res) => {
       });
     }
 
-    // Log the file download action
     await UserAction.create(
       req.user.id,
       req.user.name,

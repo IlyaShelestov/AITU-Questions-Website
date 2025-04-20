@@ -30,7 +30,7 @@ async function createTables(pool) {
           type VARCHAR(255) NOT NULL,
           size INT NOT NULL,
           path VARCHAR(255) NOT NULL,
-          audience VARCHAR(20) NOT NULL DEFAULT 'both',
+          audience VARCHAR(20) NOT NULL DEFAULT 'staff',
           user_name VARCHAR(255) NOT NULL,
           user_surname VARCHAR(255) NOT NULL,
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

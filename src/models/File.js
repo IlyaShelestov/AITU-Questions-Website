@@ -50,13 +50,13 @@ class File {
     return rows[0];
   }
 
-  static async findByName(file_name) {
+  static async findByName(file_name, audience) {
     const query = `
-            SELECT file_id, audience
-            FROM files
-            WHERE file_name = $1;
-        `;
-    const values = [file_name];
+          SELECT file_id, audience
+          FROM files
+          WHERE file_name = $1 AND audience = $2;
+  `;
+    const values = [file_name, audience];
     const { rows } = await pool.query(query, values);
     return rows[0];
   }

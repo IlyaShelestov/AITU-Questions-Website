@@ -14,9 +14,8 @@
             <div class="form-group">
                 <label for="audience">Available For</label>
                 <select id="audience" name="audience" required>
-                    <option value="students">Students Only</option>
                     <option value="staff">Staff Only</option>
-                    <option value="both">Both Students and Staff</option>
+                    <option value="students">Students Only</option>
                 </select>
             </div>
             <button type="submit" class="btn btn-primary">Upload</button>
@@ -45,9 +44,8 @@
                 <label for="filter-audience">Filter by Audience</label>
                 <select id="filter-audience">
                     <option value="all">All</option>
-                    <option value="students">Students Only</option>
                     <option value="staff">Staff Only</option>
-                    <option value="both">Both</option>
+                    <option value="students">Students Only</option>
                 </select>
             </div>
             
@@ -86,7 +84,7 @@
                                 <td><%= (file.size / 1024).toFixed(2) %> KB</td>
                                 <td><%= file.type %></td>
                                 <td><%= file.user_name %> <%= file.user_surname %></td>
-                                <td><%= file.audience === 'both' ? 'Students & Staff' : (file.audience === 'students' ? 'Students' : 'Staff') %></td>
+                                <td><%= file.audience === 'students' ? 'Students' : 'Staff' %></td>
                                 <% if (user.role === 'admin' || user.role === 'manager') { %>
                                 <td>
                                     <button class="btn btn-danger delete-file" data-id="<%= file.file_id %>">Delete</button>
