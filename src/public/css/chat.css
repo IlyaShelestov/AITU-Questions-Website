@@ -182,7 +182,32 @@
 }
 
 .sources {
-  font-size: 0.8rem;
-  margin-top: 0.5rem;
-  color: var(--light-text);
+  margin-top: 12px;
+  font-size: 0.9rem;
+}
+
+.sources-list {
+  list-style-type: none;
+  padding-left: 0;
+  margin-top: 5px;
+}
+
+.sources-list li {
+  margin-bottom: 5px;
+}
+
+.source-download-link {
+  color: var(--primary-color);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.source-download-link:hover {
+  text-decoration: underline;
+}
+
+.source-download-link::before {
+  content: "📄";
+  margin-right: 5px;
 }

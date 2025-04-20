@@ -1,6 +1,9 @@
 const axios = require("axios");
 const LlmApiClient = require("../utils/llmApi");
 const { getMermaidImageUrl } = require("../utils/krokiClient");
+const File = require("../models/File");
+const path = require("path");
+const UserAction = require("../models/UserAction");
 
 const llmClient = new LlmApiClient(process.env.LLM_API_URL);
 
@@ -127,5 +130,75 @@ exports.getFlowchartImage = async (req, res) => {
   } catch (error) {
     console.error("Error fetching diagram:", error);
     return res.status(500).send("Error fetching diagram");
+  }
+};
+
+exports.downloadSourceFile = async (req, res) => {
+  try {
+    const { filename } = req.query;
+
+    if (!filename) {
+      return res.status(400).render("error", {
+        message: "No filename provided",
+      });
+    }
+
+    const cleanFilename = filename.replace(/^\d+-\d+-/, "");
+
+    const fileByName = await File.findByName(cleanFilename, "staff");
+
+    if (!fileByName) {
+      return res.status(404).render("error", {
+        message: "File not found",
+      });
+    }
+
+    const fileInfo = await File.getFileInfo(fileByName.file_id);
+
+    if (!fileInfo || !fileInfo.path) {
+      return res.status(404).render("error", {
+        message: "File information not found",
+      });
+    }
+
+    const extension = path.extname(fileInfo.file_name).toLowerCase();
+    let contentType = fileInfo.type;
+
+    if (extension === ".docx") {
+      contentType =
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+    } else if (extension === ".xlsx") {
+      contentType =
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+    }
+
+    res.setHeader("Content-Type", contentType);
+
+    await UserAction.create(
+      req.user.id,
+      req.user.name,
+      req.user.surname,
+      "download",
+      "source_file",
+      fileByName.file_id,
+      cleanFilename,
+      `Source file downloaded from chat. Type: ${fileInfo.type}`
+    );
+
+    return res.download(fileInfo.path, cleanFilename, (err) => {
+      if (err) {
+        console.error("Error sending file:", err);
+        if (!res.headersSent) {
+          res.status(500).render("error", {
+            message: "Error downloading file",
+          });
+        }
+      }
+    });
+  } catch (error) {
+    console.error("Error downloading source file:", error);
+    return res.status(500).render("error", {
+      message: "Error downloading source file",
+    });
   }
 };

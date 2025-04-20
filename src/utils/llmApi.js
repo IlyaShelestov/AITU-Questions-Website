@@ -23,9 +23,17 @@ class LlmApiClient {
 
       const response = await this.axios.post(endpoint, payload);
 
+      let sources = [];
+      if (response.data.sources && response.data.sources.length > 0) {
+        sources = response.data.sources.map((source) => {
+          const cleanName = source.replace(/^\d+-\d+-/, "");
+          return cleanName;
+        });
+      }
+
       return {
         answer: response.data.answer,
-        sources: response.data.sources || [],
+        sources: sources,
       };
     } catch (error) {
       console.error("Error communicating with LLM API:", error);

@@ -61,34 +61,43 @@ document.addEventListener("DOMContentLoaded", function () {
         imgContainer.appendChild(imgElement);
         contentDiv.appendChild(imgContainer);
         contentDiv.appendChild(downloadLink);
-      } else {
-        const mermaidDiv = document.createElement("div");
-        mermaidDiv.className = "mermaid";
-        mermaidDiv.textContent = content.mermaid;
-        contentDiv.appendChild(mermaidDiv);
-
-        setTimeout(() => {
-          mermaid.init(undefined, ".mermaid");
-        }, 100);
-      }
-
-      if (content.sources && content.sources.length > 0) {
-        const sourcesDiv = document.createElement("div");
-        sourcesDiv.className = "sources";
-        sourcesDiv.innerHTML =
-          "<strong>Sources:</strong><br>" +
-          content.sources.map((source) => `- ${source}`).join("<br>");
-        contentDiv.appendChild(sourcesDiv);
       }
     } else {
       if (isUser) {
         contentDiv.textContent = content;
       } else {
         const trimmedContent =
-          typeof content === "string" ? content.replace(/^\s+/, "") : content;
+          typeof content.answer === "string"
+            ? content.answer.replace(/^\s+/, "")
+            : content.answer;
         const parsedMarkdown = marked.parse(trimmedContent);
         contentDiv.innerHTML = DOMPurify.sanitize(parsedMarkdown);
       }
+    }
+
+    if (content.sources && content.sources.length > 0) {
+      const sourcesDiv = document.createElement("div");
+      sourcesDiv.className = "sources";
+      sourcesDiv.innerHTML = "<strong>Sources:</strong><br>";
+
+      const sourcesList = document.createElement("ul");
+      sourcesList.className = "sources-list";
+
+      content.sources.forEach((source) => {
+        const sourceItem = document.createElement("li");
+        const sourceLink = document.createElement("a");
+        sourceLink.href = `/chat/download-source?filename=${encodeURIComponent(
+          source
+        )}`;
+        sourceLink.textContent = source;
+        sourceLink.className = "source-download-link";
+
+        sourceItem.appendChild(sourceLink);
+        sourcesList.appendChild(sourceItem);
+      });
+
+      sourcesDiv.appendChild(sourcesList);
+      contentDiv.appendChild(sourcesDiv);
     }
 
     const timeDiv = document.createElement("div");
@@ -179,7 +188,7 @@ document.addEventListener("DOMContentLoaded", function () {
           messagesContainer.removeChild(loadingMessage);
 
           if (response.ok && result.answer) {
-            addMessage(result.answer, false);
+            addMessage(result, false);
           } else {
             addMessage(
               "Sorry, I encountered an error processing your request.",
