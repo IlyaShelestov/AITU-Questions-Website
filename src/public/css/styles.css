@@ -87,11 +87,6 @@ header {
   color: var(--accent-color);
 }
 
-.user-role {
-  font-size: 0.8rem;
-  color: var(--light-text);
-}
-
 .user-controls form {
   margin: 0;
 }

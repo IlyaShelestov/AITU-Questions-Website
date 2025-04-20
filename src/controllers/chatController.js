@@ -28,11 +28,7 @@ exports.renderChatPage = async (req, res) => {
         messages = historyData.history.map((msg) => ({
           content: msg.content,
           isUser: msg.role === "user",
-          timestamp: new Date().toLocaleTimeString("en-US", {
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true,
-          }),
+          timestamp: msg.time || "",
         }));
       }
     } catch (error) {
