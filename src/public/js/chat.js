@@ -30,10 +30,30 @@ document.addEventListener("DOMContentLoaded", function () {
     contentDiv.className = "message-content";
 
     if (!isUser && typeof content === "object" && content.mermaid) {
-      const mermaidDiv = document.createElement("div");
-      mermaidDiv.className = "mermaid";
-      mermaidDiv.textContent = content.mermaid;
-      contentDiv.appendChild(mermaidDiv);
+      if (content.imageUrl) {
+        const imgElement = document.createElement("img");
+        imgElement.src = content.imageUrl;
+        imgElement.className = "mermaid-image";
+        imgElement.alt = "Flowchart";
+
+        const downloadLink = document.createElement("a");
+        downloadLink.href = content.imageUrl;
+        downloadLink.className = "download-link";
+        downloadLink.textContent = "Download Diagram";
+        downloadLink.download = "flowchart.svg";
+
+        contentDiv.appendChild(imgElement);
+        contentDiv.appendChild(downloadLink);
+      } else {
+        const mermaidDiv = document.createElement("div");
+        mermaidDiv.className = "mermaid";
+        mermaidDiv.textContent = content.mermaid;
+        contentDiv.appendChild(mermaidDiv);
+
+        setTimeout(() => {
+          mermaid.init(undefined, ".mermaid");
+        }, 100);
+      }
 
       if (content.sources && content.sources.length > 0) {
         const sourcesDiv = document.createElement("div");
@@ -43,10 +63,6 @@ document.addEventListener("DOMContentLoaded", function () {
           content.sources.map((source) => `- ${source}`).join("<br>");
         contentDiv.appendChild(sourcesDiv);
       }
-
-      setTimeout(() => {
-        mermaid.init(undefined, ".mermaid");
-      }, 100);
     } else {
       contentDiv.textContent = content;
     }
@@ -97,6 +113,7 @@ document.addEventListener("DOMContentLoaded", function () {
             body: JSON.stringify({
               message: flowchartQuery,
               sessionId,
+              format: "svg",
             }),
           });
 

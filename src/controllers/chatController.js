@@ -1,5 +1,6 @@
 const axios = require("axios");
 const LlmApiClient = require("../utils/llmApi");
+const { getMermaidImageUrl } = require("../utils/krokiClient");
 
 const llmClient = new LlmApiClient(process.env.LLM_API_URL);
 
@@ -49,7 +50,7 @@ exports.clearChatHistory = async (req, res) => {
 
 exports.generateFlowchart = async (req, res) => {
   try {
-    const { message, sessionId } = req.body;
+    const { message, sessionId, format = "svg" } = req.body;
 
     if (!message) {
       return res.status(400).json({ error: "Message is required" });
@@ -59,6 +60,10 @@ exports.generateFlowchart = async (req, res) => {
       message,
       sessionId || "default"
     );
+
+    if (response.mermaid) {
+      response.imageUrl = getMermaidImageUrl(response.mermaid, format);
+    }
 
     return res.status(200).json(response);
   } catch (error) {
