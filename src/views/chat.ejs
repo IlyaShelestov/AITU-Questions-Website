@@ -17,7 +17,9 @@
       <% if (messages && messages.length > 0) { %> <% messages.forEach(msg => {
       %>
       <div class="message <%= msg.isUser ? 'user' : 'ai' %>">
-        <div class="message-content"><%= msg.content %></div>
+        <div class="message-content" data-is-user="<%= msg.isUser %>">
+          <%= msg.content %>
+        </div>
         <div class="message-time"><%= msg.timestamp %></div>
       </div>
       <% }); %> <% } %>
@@ -38,6 +40,8 @@
       </button>
     </form>
   </div>
+  <script src="/js/vendor/marked.min.js"></script>
+  <script src="/js/vendor/purify.min.js"></script>
 </div>
 
 <%- include('partials/footer', { customJs: 'chat' }) %>

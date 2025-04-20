@@ -3,14 +3,6 @@ document.addEventListener("DOMContentLoaded", function () {
   const messageInput = document.getElementById("message-input");
   const messagesContainer = document.getElementById("messages");
   const chatBox = document.getElementById("chat-box");
-  const mermaidScript = document.createElement("script");
-  mermaidScript.src =
-    "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js";
-  document.head.appendChild(mermaidScript);
-
-  mermaidScript.onload = function () {
-    mermaid.initialize({ startOnLoad: true });
-  };
 
   let sessionId;
   const serverSessionId = chatBox.dataset.sessionId;
@@ -89,7 +81,14 @@ document.addEventListener("DOMContentLoaded", function () {
         contentDiv.appendChild(sourcesDiv);
       }
     } else {
-      contentDiv.textContent = content;
+      if (isUser) {
+        contentDiv.textContent = content;
+      } else {
+        const trimmedContent =
+          typeof content === "string" ? content.replace(/^\s+/, "") : content;
+        const parsedMarkdown = marked.parse(trimmedContent);
+        contentDiv.innerHTML = DOMPurify.sanitize(parsedMarkdown);
+      }
     }
 
     const timeDiv = document.createElement("div");
@@ -231,4 +230,13 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
   }
+
+  document
+    .querySelectorAll('.message-content[data-is-user="false"]')
+    .forEach((content) => {
+      const rawContent = content.textContent;
+      const trimmedContent = rawContent.replace(/^\s+/, "");
+      const parsedMarkdown = marked.parse(trimmedContent);
+      content.innerHTML = DOMPurify.sanitize(parsedMarkdown);
+    });
 });

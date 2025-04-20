@@ -53,6 +53,57 @@
   overflow-x: auto;
 }
 
+.message.ai .message-content code {
+  background-color: #f5f5f5;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: monospace;
+  font-size: 0.9em;
+}
+
+.message.ai .message-content pre {
+  background-color: #f5f5f5;
+  padding: 10px;
+  border-radius: 4px;
+  overflow-x: auto;
+  margin: 10px 0;
+}
+
+.message.ai .message-content pre code {
+  background-color: transparent;
+  padding: 0;
+}
+
+.message.ai .message-content a {
+  color: var(--primary-color);
+  text-decoration: underline;
+}
+
+.message.ai .message-content ul,
+.message.ai .message-content ol {
+  padding-left: 20px;
+  margin: 10px 0;
+}
+
+.message.ai .message-content p {
+  margin-bottom: 10px;
+}
+
+.message.ai .message-content h1,
+.message.ai .message-content h2,
+.message.ai .message-content h3,
+.message.ai .message-content h4 {
+  margin-top: 15px;
+  margin-bottom: 10px;
+}
+
+.message.ai .message-content blockquote {
+  border-left: 3px solid var(--primary-color);
+  padding-left: 10px;
+  margin-left: 0;
+  color: var(--light-text);
+}
+
 .message-time {
   font-size: 0.75rem;
   opacity: 0.7;
