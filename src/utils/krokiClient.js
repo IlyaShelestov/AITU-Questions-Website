@@ -1,5 +1,3 @@
-const axios = require("axios");
-
 function getMermaidImageUrl(mermaidDef, format = "svg") {
   try {
     const zlib = require("zlib");
@@ -10,7 +8,8 @@ function getMermaidImageUrl(mermaidDef, format = "svg") {
       .replace(/\+/g, "-")
       .replace(/\//g, "_")
       .replace(/=/g, "");
-    return `https://kroki.io/mermaid/${format}/${encoded}`;
+
+    return `/chat/diagram/${format}/${encoded}`;
   } catch (error) {
     console.error("Error creating Kroki URL:", error);
     throw new Error("Failed to generate diagram URL");

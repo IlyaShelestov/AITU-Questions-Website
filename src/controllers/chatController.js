@@ -113,3 +113,23 @@ exports.generateFlowchart = async (req, res) => {
       .json({ error: error.message || "Failed to generate flowchart" });
   }
 };
+
+exports.getFlowchartImage = async (req, res) => {
+  try {
+    const { encodedDiagram, format = "svg" } = req.params;
+
+    const url = `https://kroki.io/mermaid/${format}/${encodedDiagram}`;
+
+    const response = await axios.get(url, {
+      responseType: "arraybuffer",
+    });
+
+    res.set("Content-Type", format === "svg" ? "image/svg+xml" : "image/png");
+    res.set("Cache-Control", "public, max-age=86400");
+
+    return res.send(response.data);
+  } catch (error) {
+    console.error("Error fetching diagram:", error);
+    return res.status(500).send("Error fetching diagram");
+  }
+};

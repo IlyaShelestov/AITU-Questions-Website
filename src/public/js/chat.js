@@ -39,18 +39,36 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (!isUser && typeof content === "object" && content.mermaid) {
       if (content.imageUrl) {
+        // Create a container for better image handling
+        const imgContainer = document.createElement("div");
+        imgContainer.className = "mermaid-image-container";
+
         const imgElement = document.createElement("img");
         imgElement.src = content.imageUrl;
         imgElement.className = "mermaid-image";
         imgElement.alt = "Flowchart";
+
+        imgElement.onload = function () {
+          console.log("Flowchart image loaded successfully");
+        };
+        imgElement.onerror = function (e) {
+          console.error("Error loading flowchart image:", e);
+          const errorMsg = document.createElement("p");
+          errorMsg.textContent =
+            "Flowchart image could not be displayed. Please use the download link.";
+          errorMsg.className = "image-error-message";
+          imgContainer.appendChild(errorMsg);
+        };
 
         const downloadLink = document.createElement("a");
         downloadLink.href = content.imageUrl;
         downloadLink.className = "download-link";
         downloadLink.textContent = "Download Diagram";
         downloadLink.download = "flowchart.svg";
+        downloadLink.target = "_blank";
 
-        contentDiv.appendChild(imgElement);
+        imgContainer.appendChild(imgElement);
+        contentDiv.appendChild(imgContainer);
         contentDiv.appendChild(downloadLink);
       } else {
         const mermaidDiv = document.createElement("div");
