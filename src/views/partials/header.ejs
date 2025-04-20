@@ -13,20 +13,24 @@
     <header>
         <div class="logo">AITU Questions</div>
         <% if (locals.user) { %>
-            <nav>
+            <nav class="main-nav">
                 <ul>
                     <li><a href="/chat">Chat</a></li>
                     <li><a href="/files">Files</a></li>
                     <% if (user.role === 'admin') { %>
                         <li><a href="/admin">Admin</a></li>
                     <% } %>
-                    <li>
-                        <form action="/auth/logout" method="POST">
-                            <button type="submit">Logout</button>
-                        </form>
-                    </li>
                 </ul>
             </nav>
+            <div class="user-controls">
+                <div class="user-info">
+                    <span class="user-name"><%= user.name %> <%= user.surname %></span>
+                    <span class="user-role">(<%= user.role %>)</span>
+                </div>
+                <form action="/auth/logout" method="POST">
+                    <button type="submit">Logout</button>
+                </form>
+            </div>
         <% } %>
     </header>
     <main>

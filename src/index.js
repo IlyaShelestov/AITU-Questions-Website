@@ -92,6 +92,10 @@ app.use("/chat", verifyToken, chatRoutes);
 app.use("/admin", verifyToken, isAdmin, adminRoutes);
 app.use("/admin/actions", verifyToken, isAdmin, userActionsRoutes);
 
+app.use((req, res, next) => {
+  res.status(404).render("404");
+});
+
 const PORT = process.env.PORT || 5000;
 
 if (require.main === module) {

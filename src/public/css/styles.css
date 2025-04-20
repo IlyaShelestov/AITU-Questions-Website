@@ -42,35 +42,61 @@ header {
   font-size: 1.5rem;
   font-weight: bold;
   color: var(--primary-color);
+  flex: 0 0 auto;
 }
 
-nav ul {
+.main-nav {
+  flex: 1 1 auto;
+  display: flex;
+  justify-content: center;
+}
+
+.main-nav ul {
   display: flex;
   list-style: none;
+  gap: 2rem;
 }
 
-nav ul li {
-  margin-left: 1.5rem;
-}
-
-nav ul li a {
+.main-nav ul li a {
   text-decoration: none;
   color: var(--text-color);
   font-weight: 500;
   transition: color 0.3s;
 }
 
-nav ul li a:hover {
+.main-nav ul li a:hover {
   color: var(--primary-color);
 }
 
-nav ul li form {
-  display: inline-block;
-  margin: 0;
-  padding: 0;
+.user-controls {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex: 0 0 auto;
 }
 
-nav ul li form button {
+.user-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.2;
+}
+
+.user-name {
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.user-role {
+  font-size: 0.8rem;
+  color: var(--light-text);
+}
+
+.user-controls form {
+  margin: 0;
+}
+
+.user-controls form button {
   background: none;
   border: none;
   color: var(--text-color);
@@ -82,7 +108,7 @@ nav ul li form button {
   padding: 0;
 }
 
-nav ul li form button:hover {
+.user-controls form button:hover {
   color: var(--primary-color);
 }
 

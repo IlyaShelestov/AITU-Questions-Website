@@ -1,11 +1,14 @@
-<%- include('partials/header', { title: 'Error' }) %>
+<%- include('partials/header', { title: title || 'Error', customCss: 'error' }) %>
 
-<div class="error-container">
-    <h1>Error</h1>
+<div class="error-container error-<%= status || '500' %>">
+    <div class="error-code"><%= status || '500' %></div>
+    <h1 class="error-title"><%= title || 'Oops! Something went wrong' %></h1>
     <div class="error-message">
-        <p><%= message %></p>
+        <p><%= message || 'We encountered an unexpected error. Please try again later.' %></p>
     </div>
-    <a href="javascript:history.back()" class="btn btn-secondary">Go Back</a>
+    <div class="error-actions">
+        <a href="/" class="btn btn-primary">Go Back</a>
+    </div>
 </div>
 
 <%- include('partials/footer') %>
