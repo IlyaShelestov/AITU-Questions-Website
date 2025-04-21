@@ -32,6 +32,7 @@ exports.renderChatPage = async (req, res) => {
           content: msg.content,
           isUser: msg.role === "user",
           timestamp: msg.time || "",
+          sources: msg.sources || []
         }));
       }
     } catch (error) {

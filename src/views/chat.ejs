@@ -16,7 +16,7 @@
     <div id="messages">
       <% if (messages && messages.length > 0) { %> <% messages.forEach(msg => {
       %>
-      <div class="message <%= msg.isUser ? 'user' : 'ai' %>">
+      <div class="message <%= msg.isUser ? 'user' : 'ai' %>" data-sources="<%= JSON.stringify(msg.sources || []) %>">
         <div class="message-content" data-is-user="<%= msg.isUser %>">
           <%= msg.content %>
         </div>

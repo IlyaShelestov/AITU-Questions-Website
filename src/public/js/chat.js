@@ -248,4 +248,40 @@ document.addEventListener("DOMContentLoaded", function () {
       const parsedMarkdown = marked.parse(trimmedContent);
       content.innerHTML = DOMPurify.sanitize(parsedMarkdown);
     });
+
+  document.querySelectorAll(".message.ai").forEach((messageDiv) => {
+    const sourcesData = messageDiv.dataset.sources;
+    if (sourcesData) {
+      try {
+        const sources = JSON.parse(sourcesData);
+        if (sources && sources.length > 0) {
+          const contentDiv = messageDiv.querySelector(".message-content");
+          const sourcesDiv = document.createElement("div");
+          sourcesDiv.className = "sources";
+          sourcesDiv.innerHTML = "<strong>Sources:</strong><br>";
+
+          const sourcesList = document.createElement("ul");
+          sourcesList.className = "sources-list";
+
+          sources.forEach((source) => {
+            const sourceItem = document.createElement("li");
+            const sourceLink = document.createElement("a");
+            sourceLink.href = `/chat/download-source?filename=${encodeURIComponent(
+              source
+            )}`;
+            sourceLink.textContent = source;
+            sourceLink.className = "source-download-link";
+
+            sourceItem.appendChild(sourceLink);
+            sourcesList.appendChild(sourceItem);
+          });
+
+          sourcesDiv.appendChild(sourcesList);
+          contentDiv.appendChild(sourcesDiv);
+        }
+      } catch (e) {
+        console.error("Error parsing sources:", e);
+      }
+    }
+  });
 });
