@@ -7,6 +7,7 @@ const unlink = util.promisify(fs.unlink);
 const rename = util.promisify(fs.rename);
 const { simplifyMimeType } = require("../utils/fileHelpers");
 const { staffDir, studentsDir } = require("../utils/multer");
+const { scheduleVectorRefresh } = require("../utils/vectorRefresh"); // Add this import
 
 function sanitizeFilenameForContentDisposition(filename) {
   let sanitized = filename
@@ -116,6 +117,8 @@ exports.uploadFile = async (req, res) => {
         )} KB, Type: ${simplifiedType}, Audience: ${audience}`
       );
 
+      scheduleVectorRefresh(audience);
+
       return res.status(200).json({
         message: "File replaced successfully",
         file: updatedFile,
@@ -144,6 +147,8 @@ exports.uploadFile = async (req, res) => {
         )} KB, Type: ${simplifiedType}, Audience: ${audience}`
       );
 
+      scheduleVectorRefresh(audience);
+
       return res.status(201).json({
         message: "File uploaded successfully",
         file,
@@ -165,6 +170,8 @@ exports.deleteFile = async (req, res) => {
     }
 
     const fileInfo = await File.getFileInfo(fileId);
+    const audience = fileInfo.audience;
+
     const deletedFile = await File.delete(fileId);
 
     if (!deletedFile) {
@@ -183,6 +190,8 @@ exports.deleteFile = async (req, res) => {
       fileInfo.file_name,
       `File deleted. Type: ${fileInfo.type}, Audience: ${fileInfo.audience}`
     );
+
+    scheduleVectorRefresh(audience);
 
     return res.status(200).json({ message: "File deleted successfully" });
   } catch (error) {
