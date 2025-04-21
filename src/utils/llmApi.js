@@ -72,6 +72,16 @@ class LlmApiClient {
       const response = await this.axios.get(
         `/api/teacher/chat/history?session_id=${sessionId}`
       );
+      if (response.data.history) {
+        response.data.history.forEach((msg) => {
+          if (msg.sources && msg.sources.length > 0) {
+            msg.sources = msg.sources.map((source) => {
+              const cleanName = source.replace(/^\d+-\d+-/, "");
+              return cleanName;
+            });
+          }
+        });
+      }
       return response.data;
     } catch (error) {
       console.error("Error fetching chat history:", error);
