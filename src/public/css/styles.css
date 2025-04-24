@@ -273,3 +273,31 @@ table th {
 .close:hover {
   color: var(--danger-color);
 }
+
+.feedback-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: var(--primary-color);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 50px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  font-weight: 500;
+  z-index: 1000;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.feedback-button:hover {
+  background-color: var(--accent-color);
+  transform: translateY(-3px);
+}
+
+.feedback-button::before {
+  content: "💬";
+  margin-right: 8px;
+  font-size: 1.2em;
+}
