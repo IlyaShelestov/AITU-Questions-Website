@@ -1,5 +1,6 @@
 .upload-section,
-.files-section {
+.files-section,
+.similarity-check-section {
   margin-top: 2rem;
   padding: 1.5rem;
   background-color: white;
@@ -8,25 +9,29 @@
 }
 
 .upload-section h2,
-.files-section h2 {
+.files-section h2,
+.similarity-check-section h2 {
   margin-bottom: 1.5rem;
   padding-bottom: 0.5rem;
   border-bottom: 1px solid var(--border-color);
 }
 
-#upload-form {
+#upload-form,
+#similarity-form {
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
   align-items: flex-end;
 }
 
-#upload-form .form-group {
+#upload-form .form-group,
+#similarity-form .form-group {
   flex: 1 1 300px;
   margin-bottom: 0;
 }
 
-#upload-message {
+#upload-message,
+#similarity-result {
   margin-top: 1rem;
 }
 
@@ -55,6 +60,27 @@
 .filters .form-group {
   flex: 1;
   margin-bottom: 0;
+}
+
+.similarity-results {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 4px;
+  background-color: #f8f9fa;
+  border-left: 4px solid var(--primary-color);
+}
+
+.similarity-results ul {
+  margin-top: 0.5rem;
+  padding-left: 1.5rem;
+}
+
+.similarity-results li {
+  margin-bottom: 0.25rem;
+}
+
+.error-message {
+  color: #dc3545;
 }
 
 @media (max-width: 768px) {

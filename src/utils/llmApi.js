@@ -1,4 +1,6 @@
 const axios = require("axios");
+const FormData = require("form-data");
+const fs = require("fs");
 
 class LlmApiClient {
   constructor(baseUrl) {
@@ -99,6 +101,29 @@ class LlmApiClient {
     } catch (error) {
       console.error("Error generating flowchart:", error);
       throw new Error("Failed to generate flowchart");
+    }
+  }
+
+  async checkFileSimilarity(file, role = "teacher") {
+    const formData = new FormData();
+
+    formData.append("file", file.buffer, {
+      filename: file.originalname,
+      contentType: file.mimetype,
+    });
+
+    try {
+      const response = await this.axios.post(
+        `/api/${role}/docs/check_similarity`,
+        formData,
+        {
+          headers: formData.getHeaders(),
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error checking file similarity:", error);
+      throw new Error("Failed to check file similarity");
     }
   }
 }

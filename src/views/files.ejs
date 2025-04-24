@@ -4,12 +4,24 @@
     <h1>Files Management</h1>
     
     <% if (user.role === 'admin' || user.role === 'manager') { %>
+    <div class="similarity-check-section">
+        <h2>Check File Similarity</h2>
+        <form id="similarity-form" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="similarity-file-input">Select File</label>
+                <input type="file" id="similarity-file-input" name="file" accept=".docx,.xlsx,.pdf" required>
+            </div>
+            <button type="button" id="check-similarity-btn" class="btn btn-primary">Check Similarity</button>
+        </form>
+        <div id="similarity-result"></div>
+    </div>
+    
     <div class="upload-section">
         <h2>Upload New File</h2>
         <form id="upload-form" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="file">Select File</label>
-                <input type="file" id="file" name="file" required>
+                <input type="file" id="file" name="file" accept=".docx,.xlsx,.pdf" required>
             </div>
             <div class="form-group">
                 <label for="audience">Available For</label>

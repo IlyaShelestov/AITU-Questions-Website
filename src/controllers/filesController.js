@@ -7,7 +7,9 @@ const unlink = util.promisify(fs.unlink);
 const rename = util.promisify(fs.rename);
 const { simplifyMimeType } = require("../utils/fileHelpers");
 const { staffDir, studentsDir } = require("../utils/multer");
-const { scheduleVectorRefresh } = require("../utils/vectorRefresh"); // Add this import
+const { scheduleVectorRefresh } = require("../utils/vectorRefresh");
+const LlmApiClient = require("../utils/llmApi");
+const llmClient = new LlmApiClient(process.env.LLM_API_URL);
 
 function sanitizeFilenameForContentDisposition(filename) {
   let sanitized = filename
@@ -260,5 +262,36 @@ exports.downloadFile = async (req, res) => {
     return res.status(500).render("error", {
       message: "Error downloading file",
     });
+  }
+};
+
+exports.checkFileSimilarity = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    const fileExt = path.extname(req.file.originalname).toLowerCase();
+    if (![".docx", ".xlsx", ".pdf"].includes(fileExt)) {
+      return res
+        .status(400)
+        .json({ error: "Only .docx, .xlsx, and .pdf files are allowed." });
+    }
+
+    const role = req.user.role === "student" ? "student" : "teacher";
+
+    const result = await llmClient.checkFileSimilarity(
+      {
+        buffer: req.file.buffer,
+        originalname: req.file.originalname,
+        mimetype: req.file.mimetype,
+      },
+      role
+    );
+
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error("Similarity check error:", error);
+    return res.status(500).json({ error: "Failed to check similarity" });
   }
 };

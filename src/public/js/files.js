@@ -6,6 +6,9 @@ document.addEventListener("DOMContentLoaded", function () {
   const filterType = document.getElementById("filter-type");
   const filterAudience = document.getElementById("filter-audience");
   const filterUploader = document.getElementById("filter-uploader");
+  const similarityInput = document.getElementById("similarity-file-input");
+  const similarityButton = document.getElementById("check-similarity-btn");
+  const similarityResult = document.getElementById("similarity-result");
 
   function applyFilters() {
     const typeFilter = filterType.value;
@@ -131,6 +134,62 @@ document.addEventListener("DOMContentLoaded", function () {
         const fileId = this.getAttribute("data-file-id");
         window.location.href = `/files/download/${fileId}`;
       });
+    });
+  }
+
+  if (similarityButton && similarityInput) {
+    similarityButton.addEventListener("click", async function () {
+      const file = similarityInput.files[0];
+      if (!file) {
+        similarityResult.innerHTML = "<p>Please select a file.</p>";
+        return;
+      }
+
+      const fileName = file.name.toLowerCase();
+      if (
+        !fileName.endsWith(".docx") &&
+        !fileName.endsWith(".xlsx") &&
+        !fileName.endsWith(".pdf")
+      ) {
+        similarityResult.innerHTML =
+          "<p>Only .docx, .xlsx, and .pdf files are allowed.</p>";
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      similarityResult.innerHTML = "<p>Checking similarity...</p>";
+
+      try {
+        const response = await fetch("/files/check-similarity", {
+          method: "POST",
+          body: formData,
+        });
+        const result = await response.json();
+        if (response.ok && result.possible_duplicates) {
+          if (result.possible_duplicates.length === 0) {
+            similarityResult.innerHTML = "<p>No similar files found.</p>";
+          } else {
+            similarityResult.innerHTML =
+              "<div class='similarity-results'><strong>Possible duplicates:</strong><ul>" +
+              result.possible_duplicates
+                .map(
+                  (dup) =>
+                    `<li>${dup.file} - Similarity: ${dup.similarity}%</li>`
+                )
+                .join("") +
+              "</ul></div>";
+          }
+        } else {
+          similarityResult.innerHTML = `<p class="error-message">Error: ${
+            result.error || "Failed to check similarity"
+          }</p>`;
+        }
+      } catch (error) {
+        similarityResult.innerHTML =
+          "<p class='error-message'>Error checking similarity. Please try again.</p>";
+      }
     });
   }
 });
