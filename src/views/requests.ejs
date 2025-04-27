@@ -1,0 +1,399 @@
+<%- include('partials/header') %>
+
+<div class="container mt-4">
+  <h1>Student Requests</h1>
+  
+  <div class="filter-section mb-4">
+    <form action="/requests" method="GET" class="d-flex align-items-center">
+      <div class="form-group me-2">
+        <select name="status" class="form-control">
+          <option value="">All Statuses</option>
+          <option value="new" <%= currentStatus === 'new' ? 'selected' : '' %>>New</option>
+          <option value="in_progress" <%= currentStatus === 'in_progress' ? 'selected' : '' %>>In Progress</option>
+          <option value="completed" <%= currentStatus === 'completed' ? 'selected' : '' %>>Completed</option>
+          <option value="rejected" <%= currentStatus === 'rejected' ? 'selected' : '' %>>Rejected</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary">Filter</button>
+    </form>
+  </div>
+
+  <% if (requests.length === 0) { %>
+    <div class="alert alert-info">No requests found.</div>
+  <% } else { %>
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Student</th>
+            <th>Request</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Updated</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% requests.forEach(request => { %>
+            <tr data-request-id="<%= request.request_id %>">
+              <td><%= request.request_id %></td>
+              <td><%= request.user_name %></td>
+              <td><%= request.message %></td>
+              <td>
+                <span class="status-badge <%= request.status %>"><%= request.status.replace('_', ' ') %></span>
+              </td>
+              <td><%= new Date(request.created_at).toLocaleString() %></td>
+              <td><%= request.updated_at ? new Date(request.updated_at).toLocaleString() : '-' %></td>
+              <td>
+                <div class="btn-group">
+                  <% if (request.status !== 'completed' && request.status !== 'rejected') { %>
+                  <% if (request.status === 'new') { %>
+                    <button class="btn btn-sm btn-primary update-status" data-status="in_progress">
+                      In Progress
+                    </button>
+                  <% } %>
+                  <% if (request.status === 'in_progress') { %>
+                    <button class="btn btn-sm btn-success answer-request" data-id="<%= request.request_id %>" data-telegram="<%= request.telegram_id %>" data-username="<%= request.user_name %>">
+                      Answer
+                    </button>
+                    <button class="btn btn-sm btn-danger update-status" data-status="rejected">
+                      Reject
+                    </button>
+                  <% } %>
+                  <% if (request.status !== 'in_progress') { %>
+                  <button class="btn btn-sm btn-success update-status" data-status="completed">
+                    Completed
+                  </button>
+                  <% } %>
+                  <% } %>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    
+    <% if (pagination && pagination.total > 1) { %>
+      <div class="pagination">
+        <div class="pagination-controls">
+          <% if (pagination.prev) { %>
+            <a href="?page=<%= pagination.prev %><%= currentStatus ? '&status=' + currentStatus : '' %>" class="btn btn-sm btn-outline-secondary">Previous</a>
+          <% } else { %>
+            <button disabled class="btn btn-sm btn-outline-secondary">Previous</button>
+          <% } %>
+          
+          <% 
+            const startPage = Math.max(1, pagination.current - 2);
+            const endPage = Math.min(pagination.total, startPage + 4);
+          %>
+          
+          <% if (startPage > 1) { %>
+            <a href="?page=1<%= currentStatus ? '&status=' + currentStatus : '' %>" class="btn btn-sm btn-outline-secondary">1</a>
+            <% if (startPage > 2) { %><span class="pagination-ellipsis">...</span><% } %>
+          <% } %>
+          
+          <% for (let i = startPage; i <= endPage; i++) { %>
+            <% if (i === pagination.current) { %>
+              <button disabled class="btn btn-sm btn-primary"><%= i %></button>
+            <% } else { %>
+              <a href="?page=<%= i %><%= currentStatus ? '&status=' + currentStatus : '' %>" class="btn btn-sm btn-outline-secondary"><%= i %></a>
+            <% } %>
+          <% } %>
+          
+          <% if (endPage < pagination.total) { %>
+            <% if (endPage < pagination.total - 1) { %><span class="pagination-ellipsis">...</span><% } %>
+            <a href="?page=<%= pagination.total %><%= currentStatus ? '&status=' + currentStatus : '' %>" class="btn btn-sm btn-outline-secondary"><%= pagination.total %></a>
+          <% } %>
+          
+          <% if (pagination.next) { %>
+            <a href="?page=<%= pagination.next %><%= currentStatus ? '&status=' + currentStatus : '' %>" class="btn btn-sm btn-outline-secondary">Next</a>
+          <% } else { %>
+            <button disabled class="btn btn-sm btn-outline-secondary">Next</button>
+          <% } %>
+        </div>
+        
+        <div class="pagination-info">
+          Page <%= pagination.current %> of <%= pagination.total %>
+        </div>
+      </div>
+    <% } %>
+  <% } %>
+
+  <div class="modal" id="answer-modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Answer Request</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="answer-form">
+            <input type="hidden" id="request-id">
+            <input type="hidden" id="telegram-id">
+            <div class="form-group">
+              <label for="student-name">Student:</label>
+              <input type="text" class="form-control" id="student-name" readonly>
+            </div>
+            <div class="form-group">
+              <label for="answer-text">Your Answer:</label>
+              <textarea class="form-control" id="answer-text" rows="4" required></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id="send-answer">Send Answer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const statusButtons = document.querySelectorAll('.update-status');
+  const answerButtons = document.querySelectorAll('.answer-request');
+  const answerModal = document.getElementById('answer-modal');
+  const closeButtons = document.querySelectorAll('[data-dismiss="modal"]');
+  const sendAnswerButton = document.getElementById('send-answer');
+  
+  statusButtons.forEach(button => {
+    button.addEventListener('click', async function() {
+      const requestId = this.closest('tr').dataset.requestId;
+      const newStatus = this.dataset.status;
+      const row = this.closest('tr');
+      const telegramId = row.querySelector('.answer-request')?.dataset.telegram;
+      const userName = row.querySelector('.answer-request')?.dataset.username || 'Student';
+      
+      try {
+        // For rejected or completed status, send an automatic message
+        if (newStatus === 'rejected' || newStatus === 'completed') {
+          const messageText = newStatus === 'rejected' 
+            ? `We're sorry, but we cannot process your request at this time.` 
+            : `Your request has been completed successfully!`;
+          console.log(newStatus, messageText);
+          // Only send message if we have telegram ID
+          if (telegramId) {
+            const messageResponse = await fetch(`/requests/${requestId}/answer`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                telegramId,
+                answer: messageText
+              })
+            });
+            
+            if (!messageResponse.ok) {
+              console.error('Failed to send automated message');
+            }
+          }
+        }
+        
+        // Update the status
+        const response = await fetch(`/requests/${requestId}/status`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ status: newStatus })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+          window.location.reload();
+        } else {
+          alert(result.error || 'Failed to update request status');
+        }
+      } catch (error) {
+        console.error('Error updating request status:', error);
+        alert('An error occurred while updating the request status.');
+      }
+    });
+  });
+  
+  answerButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const requestId = this.dataset.id;
+      const telegramId = this.dataset.telegram;
+      const userName = this.dataset.username;
+      
+      document.getElementById('request-id').value = requestId;
+      document.getElementById('telegram-id').value = telegramId;
+      document.getElementById('student-name').value = userName;
+      document.getElementById('answer-text').value = '';
+      
+      answerModal.style.display = 'block';
+    });
+  });
+  
+  closeButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      answerModal.style.display = 'none';
+    });
+  });
+  
+  window.addEventListener('click', function(e) {
+    if (e.target === answerModal) {
+      answerModal.style.display = 'none';
+    }
+  });
+  
+  sendAnswerButton.addEventListener('click', async function() {
+    const requestId = document.getElementById('request-id').value;
+    const telegramId = document.getElementById('telegram-id').value;
+    const answerText = document.getElementById('answer-text').value;
+    
+    if (!answerText.trim()) {
+      alert('Please enter an answer');
+      return;
+    }
+    
+    try {
+      const response = await fetch(`/requests/${requestId}/answer`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          telegramId,
+          answer: answerText
+        })
+      });
+      
+      const result = await response.json();
+      
+      if (response.ok) {
+        answerModal.style.display = 'none';
+        const statusResponse = await fetch(`/requests/${requestId}/status`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ status: 'completed' })
+        });
+        
+        if (statusResponse.ok) {
+          window.location.reload();
+        }
+      } else {
+        alert(result.error || 'Failed to send answer');
+      }
+    } catch (error) {
+      console.error('Error sending answer:', error);
+      alert('An error occurred while sending the answer.');
+    }
+  });
+});
+</script>
+
+<style>
+.status-badge {
+  padding: 3px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+.status-badge.new {
+  background-color: #e3f2fd;
+  color: #0d47a1;
+}
+.status-badge.in_progress {
+  background-color: #fff8e1;
+  color: #ff6f00;
+}
+.status-badge.completed {
+  background-color: #e8f5e9;
+  color: #1b5e20;
+}
+.status-badge.rejected {
+  background-color: #ffebee;
+  color: #b71c1c;
+}
+
+.pagination {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.pagination-info {
+  font-size: 14px;
+  color: #666;
+}
+
+.pagination-ellipsis {
+  margin: 0 5px;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.4);
+}
+
+.modal-dialog {
+  margin: 10% auto;
+  width: 500px;
+  max-width: 90%;
+}
+
+.modal-content {
+  background-color: #fefefe;
+  padding: 20px;
+  border: 1px solid #888;
+  border-radius: 5px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #dee2e6;
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid #dee2e6;
+  padding-top: 10px;
+  margin-top: 15px;
+  gap: 10px;
+}
+
+.close {
+  color: #aaa;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close:hover {
+  color: black;
+}
+</style>
+
+<%- include('partials/footer') %>

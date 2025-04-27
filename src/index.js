@@ -13,6 +13,7 @@ const filesRoutes = require("./routes/filesRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 const userActionsRoutes = require("./routes/userActionsRoutes");
+const requestsRoutes = require("./routes/requestsRoutes");
 
 const app = express();
 
@@ -42,7 +43,7 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
         imgSrc: ["'self'", "data:"],
         connectSrc: ["'self'"],
@@ -87,6 +88,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/auth", authRoutes);
+app.use("/requests", requestsRoutes);
 app.use("/files", verifyToken, filesRoutes);
 app.use("/chat", verifyToken, chatRoutes);
 app.use("/admin", verifyToken, isAdmin, adminRoutes);
