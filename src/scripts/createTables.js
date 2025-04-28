@@ -52,6 +52,18 @@ async function createTables(pool) {
         );
       `);
     await pool.query(`
+        CREATE TABLE IF NOT EXISTS requests (
+          request_id SERIAL PRIMARY KEY,
+          user_id INT,
+          user_name VARCHAR(255) NOT NULL,
+          telegram_id VARCHAR(50) NOT NULL,
+          message TEXT NOT NULL,
+          status VARCHAR(20) NOT NULL DEFAULT 'new',
+          created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+          updated_at TIMESTAMP
+        );
+      `);
+    await pool.query(`
         CREATE TRIGGER set_modified_users
         BEFORE UPDATE ON users
         FOR EACH ROW

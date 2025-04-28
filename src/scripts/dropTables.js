@@ -3,6 +3,7 @@ async function dropTables(pool) {
     await pool.query("BEGIN");
     await pool.query("DROP TABLE IF EXISTS files CASCADE;");
     await pool.query("DROP TABLE IF EXISTS users CASCADE;");
+    await pool.query("DROP TABLE IF EXISTS requests CASCADE;");
     await pool.query("DROP TABLE IF EXISTS user_actions CASCADE;");
     await pool.query("COMMIT");
     console.log("Tables dropped successfully.");
