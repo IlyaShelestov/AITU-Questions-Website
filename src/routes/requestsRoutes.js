@@ -6,11 +6,11 @@ const {
   receiveRequest,
   answerRequest,
 } = require("../controllers/requestsController");
-const { verifyToken, isAdmin } = require("../middlewares/authMiddleware");
+const { verifyToken, isManager } = require("../middlewares/authMiddleware");
 
-router.get("/", verifyToken, isAdmin, renderRequestsPage);
-router.put("/:id/status", verifyToken, isAdmin, updateRequestStatus);
-router.post("/:id/answer", verifyToken, isAdmin, answerRequest);
+router.get("/", verifyToken, isManager, renderRequestsPage);
+router.put("/:id/status", verifyToken, isManager, updateRequestStatus);
+router.post("/:id/answer", verifyToken, isManager, answerRequest);
 
 router.post("/api/submit", receiveRequest);
 
