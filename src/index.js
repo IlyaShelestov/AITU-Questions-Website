@@ -6,6 +6,8 @@ const morgan = require("morgan");
 const cookieParser = require("cookie-parser");
 const rateLimit = require("express-rate-limit");
 const path = require("path");
+const https = require("https");
+const fs = require("fs");
 
 const { verifyToken, isAdmin } = require("./middlewares/authMiddleware");
 const authRoutes = require("./routes/authRoutes");
@@ -101,9 +103,20 @@ app.use((req, res, next) => {
 const PORT = process.env.PORT || 5000;
 
 if (require.main === module) {
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-  });
+  if (process.env.NODE_ENV === "production") {
+    const options = {
+      key: fs.readFileSync(path.join(__dirname, "../ssl/private.key")),
+      cert: fs.readFileSync(path.join(__dirname, "../ssl/certificate.crt")),
+    };
+
+    https.createServer(options, app).listen(PORT, () => {
+      console.log(`HTTPS Server running on port ${PORT}`);
+    });
+  } else {
+    app.listen(PORT, () => {
+      console.log(`HTTP Server running on port ${PORT} (Development Only)`);
+    });
+  }
 }
 
 module.exports = app;
