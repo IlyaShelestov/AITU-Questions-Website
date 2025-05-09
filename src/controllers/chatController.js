@@ -4,6 +4,8 @@ const { getMermaidImageUrl } = require("../utils/krokiClient");
 const File = require("../models/File");
 const path = require("path");
 const UserAction = require("../models/UserAction");
+const fs = require("fs");
+const FormData = require("form-data");
 
 const llmClient = new LlmApiClient(process.env.LLM_API_URL);
 
@@ -201,5 +203,54 @@ exports.downloadSourceFile = async (req, res) => {
     return res.status(500).render("error", {
       message: "Error downloading source file",
     });
+  }
+};
+
+exports.analyzeDoc = async (req, res) => {
+  try {
+    const file = req.file;
+    const question = req.body.question || "Analyze this file";
+    if (!file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+    // Call backend RAG API for instant file analysis
+    const formData = new FormData();
+    formData.append("file", fs.createReadStream(file.path), file.originalname);
+    formData.append("question", question);
+    // Choose teacher or student endpoint based on user role if needed
+    const apiUrl = process.env.LLM_API_URL + "/api/teacher/docs/analyze";
+    const response = await axios.post(apiUrl, formData, {
+      headers: formData.getHeaders ? formData.getHeaders() : formData.headers,
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity,
+    });
+    // Clean up temp file
+    fs.unlink(file.path, () => {});
+    if (response.data && response.data.answer) {
+      return res.json({ answer: response.data.answer });
+    } else {
+      return res.status(500).json({ error: "No answer from analysis API" });
+    }
+  } catch (error) {
+    console.error("Error analyzing document:", error);
+    return res.status(500).json({ error: error.message || "Failed to analyze document" });
+  }
+};
+
+exports.generateFile = async (req, res) => {
+  try {
+    const { description } = req.body;
+    if (!description) {
+      return res.status(400).json({ error: "Description is required" });
+    }
+    // Проксируем на backend FastAPI
+    const apiRes = await axios.post(
+      process.env.LLM_API_URL + "/api/generate",
+      { description }
+    );
+    return res.status(200).json(apiRes.data);
+  } catch (error) {
+    console.error("Error generating file:", error);
+    return res.status(500).json({ error: "Failed to generate file" });
   }
 };

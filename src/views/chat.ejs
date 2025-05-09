@@ -11,6 +11,9 @@
         Type <code>/flowchart your question</code> to generate a flowchart
         diagram.
       </p>
+      <p>
+        Type <code>/generate</code> to generate a file.
+      </p>
     </div>
 
     <div id="messages">
@@ -27,18 +30,27 @@
   </div>
 
   <div class="chat-input">
-    <form id="chat-form">
+    <form id="chat-form" enctype="multipart/form-data">
       <input
         type="text"
         id="message-input"
         placeholder="Type your question here..."
         autofocus
       />
+      <label for="file-input" class="file-upload-label" title="Attach a file for instant analysis">
+        <input type="file" id="file-input" name="file" style="display:none;" />
+        <span class="file-upload-icon" style="cursor:pointer; font-size:1.5em; vertical-align:middle;">📎</span>
+      </label>
       <button type="submit" class="btn btn-primary">Send</button>
       <button type="button" id="clear-chat" class="btn btn-danger">
         Clear
       </button>
     </form>
+    <style>
+      .file-upload-label { margin-left: 8px; }
+      .file-upload-icon { transition: color 0.2s; }
+      .file-upload-label:hover .file-upload-icon { color: #007bff; }
+    </style>
   </div>
   <script src="/js/vendor/marked.min.js"></script>
   <script src="/js/vendor/purify.min.js"></script>

@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const messageInput = document.getElementById("message-input");
   const messagesContainer = document.getElementById("messages");
   const chatBox = document.getElementById("chat-box");
+  const fileInput = document.getElementById("file-input");
 
   let sessionId;
   const serverSessionId = chatBox.dataset.sessionId;
@@ -117,16 +118,79 @@ document.addEventListener("DOMContentLoaded", function () {
     chatBox.scrollTop = chatBox.scrollHeight;
   }
 
+  // Show selected file name before sending
+  if (fileInput) {
+    const fileLabel = document.createElement("span");
+    fileLabel.id = "selected-file-label";
+    fileLabel.style.marginLeft = "10px";
+    fileInput.addEventListener("change", function () {
+      const file = fileInput.files && fileInput.files[0];
+      let label = document.getElementById("selected-file-label");
+      if (!label) {
+        label = fileLabel;
+        fileInput.parentNode.appendChild(label);
+      }
+      if (file) {
+        label.textContent = `Selected: ${file.name}`;
+      } else {
+        label.textContent = "";
+      }
+    });
+  }
+
   if (chatForm) {
     chatForm.addEventListener("submit", async function (e) {
       e.preventDefault();
 
       const message = messageInput.value.trim();
-      if (!message) return;
+      const file = fileInput && fileInput.files && fileInput.files[0] ? fileInput.files[0] : null;
+      if (!message && !file) return;
 
-      addMessage(message, true);
+      // Show file as a message before sending
+      if (file) {
+        addMessage(`📎 ${file.name}`, true);
+      }
 
+      if (message) addMessage(message, true);
       messageInput.value = "";
+
+      // Clear file selection after send
+      if (fileInput) {
+        fileInput.value = "";
+        let label = document.getElementById("selected-file-label");
+        if (label) label.textContent = "";
+      }
+
+      if (file) {
+        const loadingMessage = document.createElement("div");
+        loadingMessage.className = "message ai";
+        loadingMessage.innerHTML = "<div class='message-content'>Analyzing your file...</div>";
+        messagesContainer.appendChild(loadingMessage);
+        chatBox.scrollTop = chatBox.scrollHeight;
+
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("question", message || "Analyze this file");
+
+        try {
+          const response = await fetch("/chat/analyze-doc", {
+            method: "POST",
+            body: formData,
+          });
+          const result = await response.json();
+          messagesContainer.removeChild(loadingMessage);
+          if (response.ok && result.answer) {
+            addMessage(result, false);
+          } else {
+            addMessage("Sorry, I couldn't analyze your file.", false);
+          }
+        } catch (error) {
+          messagesContainer.removeChild(loadingMessage);
+          addMessage("Sorry, I couldn't analyze your file.", false);
+        }
+        fileInput.value = "";
+        return;
+      }
 
       try {
         if (message.startsWith("/flowchart ")) {
@@ -164,6 +228,39 @@ document.addEventListener("DOMContentLoaded", function () {
             );
             console.error("API error:", result.error);
           }
+        } else if (message.startsWith("/generate ")) {
+          const generateQuery = message.substring("/generate ".length);
+
+          const loadingMessage = document.createElement("div");
+          loadingMessage.className = "message ai";
+          loadingMessage.innerHTML =
+            "<div class='message-content'>Generating file...</div>";
+          messagesContainer.appendChild(loadingMessage);
+          chatBox.scrollTop = chatBox.scrollHeight;
+
+          const response = await fetch("/chat/generate", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ description: generateQuery }),
+          });
+
+          const result = await response.json();
+
+          messagesContainer.removeChild(loadingMessage);
+
+          if (response.ok && result.download_url) {
+            addMessage(
+              {
+                answer: `Файл сгенерирован. <a href="${result.download_url}" download>Скачать файл</a>`,
+              },
+              false
+            );
+          } else {
+            addMessage("Sorry, I couldn't generate your file.", false);
+          }
+          return;
         } else {
           const loadingMessage = document.createElement("div");
           loadingMessage.className = "message ai";
