@@ -11,14 +11,12 @@ document.addEventListener("DOMContentLoaded", function () {
       const newStatus = this.dataset.status;
       const row = this.closest("tr");
       const telegramId = row.querySelector(".answer-request")?.dataset.telegram;
-      const userName =
-        row.querySelector(".answer-request")?.dataset.username || "Student";
 
       try {
         if (newStatus === "rejected" || newStatus === "completed") {
           const messageText =
             newStatus === "rejected"
-              ? `We're sorry, but we cannot process your request at this time.`
+              ? `Your request has been closed. Thank you for your patience!`
               : `Your request has been completed successfully!`;
           console.log(newStatus, messageText);
           if (telegramId) {

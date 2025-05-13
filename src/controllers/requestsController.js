@@ -51,8 +51,7 @@ exports.updateRequestStatus = async (req, res) => {
       try {
         await axios.post(`${process.env.BOT_API_URL}/notify`, {
           telegramId: request.telegram_id,
-          message:
-            "Your request is now in progress. A staff member is working on it.",
+          message: `Your request #${id} is now in progress. A staff member is working on it.`,
         });
       } catch (notifyError) {
         console.error("Error notifying student:", notifyError);
@@ -108,7 +107,7 @@ exports.answerRequest = async (req, res) => {
     try {
       await axios.post(`${process.env.BOT_API_URL}/send-answer`, {
         telegramId,
-        message: answer,
+        message: `(Request #${id}) ` + answer,
       });
     } catch (botError) {
       console.error("Error sending answer to Telegram bot:", botError);

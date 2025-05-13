@@ -41,7 +41,7 @@
               <td><%= request.user_name %></td>
               <td><%= request.message %></td>
               <td>
-                <span class="status-badge <%= request.status %>"><%= request.status.replace('_', ' ') %></span>
+                <span class="status-badge <%= request.status %>"><%= request.status === 'rejected' ? 'Closed' : request.status.replace('_', ' ') %></span>
               </td>
               <td><%= new Date(request.created_at).toLocaleString() %></td>
               <td><%= request.updated_at ? new Date(request.updated_at).toLocaleString() : '-' %></td>
@@ -58,13 +58,8 @@
                       Answer
                     </button>
                     <button class="btn btn-sm btn-danger update-status" data-status="rejected">
-                      Reject
+                      Close
                     </button>
-                  <% } %>
-                  <% if (request.status !== 'in_progress') { %>
-                  <button class="btn btn-sm btn-success update-status" data-status="completed">
-                    Completed
-                  </button>
                   <% } %>
                   <% } %>
                 </div>
