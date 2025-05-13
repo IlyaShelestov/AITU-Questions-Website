@@ -98,3 +98,10 @@
 .close:hover {
   color: black;
 }
+
+.message-cell {
+  max-height: 240px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  padding-right: 8px;
+}

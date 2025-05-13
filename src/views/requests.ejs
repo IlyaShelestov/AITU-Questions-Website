@@ -27,7 +27,7 @@
           <tr>
             <th>ID</th>
             <th>Student</th>
-            <th>Request</th>
+            <th>Message</th>
             <th>Status</th>
             <th>Created</th>
             <th>Updated</th>
@@ -39,7 +39,11 @@
             <tr data-request-id="<%= request.request_id %>">
               <td><%= request.request_id %></td>
               <td><%= request.user_name %></td>
-              <td><%= request.message %></td>
+              <td>
+                <div class="message-cell">
+                  <%= request.message %>
+                </div>
+              </td>
               <td>
                 <span class="status-badge <%= request.status %>"><%= request.status === 'rejected' ? 'Closed' : request.status.replace('_', ' ') %></span>
               </td>
