@@ -118,7 +118,6 @@ document.addEventListener("DOMContentLoaded", function () {
     chatBox.scrollTop = chatBox.scrollHeight;
   }
 
-  // Show selected file name before sending
   if (fileInput) {
     const fileLabel = document.createElement("span");
     fileLabel.id = "selected-file-label";
@@ -143,10 +142,12 @@ document.addEventListener("DOMContentLoaded", function () {
       e.preventDefault();
 
       const message = messageInput.value.trim();
-      const file = fileInput && fileInput.files && fileInput.files[0] ? fileInput.files[0] : null;
+      const file =
+        fileInput && fileInput.files && fileInput.files[0]
+          ? fileInput.files[0]
+          : null;
       if (!message && !file) return;
 
-      // Show file as a message before sending
       if (file) {
         addMessage(`📎 ${file.name}`, true);
       }
@@ -154,7 +155,6 @@ document.addEventListener("DOMContentLoaded", function () {
       if (message) addMessage(message, true);
       messageInput.value = "";
 
-      // Clear file selection after send
       if (fileInput) {
         fileInput.value = "";
         let label = document.getElementById("selected-file-label");
@@ -164,7 +164,8 @@ document.addEventListener("DOMContentLoaded", function () {
       if (file) {
         const loadingMessage = document.createElement("div");
         loadingMessage.className = "message ai";
-        loadingMessage.innerHTML = "<div class='message-content'>Analyzing your file...</div>";
+        loadingMessage.innerHTML =
+          "<div class='message-content'>Analyzing your file...</div>";
         messagesContainer.appendChild(loadingMessage);
         chatBox.scrollTop = chatBox.scrollHeight;
 
