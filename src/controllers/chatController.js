@@ -34,7 +34,7 @@ exports.renderChatPage = async (req, res) => {
           content: msg.content,
           isUser: msg.role === "user",
           timestamp: msg.time || "",
-          sources: msg.sources || []
+          sources: msg.sources || [],
         }));
       }
     } catch (error) {
@@ -213,7 +213,6 @@ exports.analyzeDoc = async (req, res) => {
     if (!file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
-    // Call backend RAG API for instant file analysis
     const formData = new FormData();
     formData.append("file", fs.createReadStream(file.path), file.originalname);
     formData.append("question", question);
@@ -233,7 +232,9 @@ exports.analyzeDoc = async (req, res) => {
     }
   } catch (error) {
     console.error("Error analyzing document:", error);
-    return res.status(500).json({ error: error.message || "Failed to analyze document" });
+    return res
+      .status(500)
+      .json({ error: error.message || "Failed to analyze document" });
   }
 };
 
@@ -244,10 +245,9 @@ exports.generateFile = async (req, res) => {
       return res.status(400).json({ error: "Description is required" });
     }
     // Проксируем на backend FastAPI
-    const apiRes = await axios.post(
-      process.env.LLM_API_URL + "/api/generate",
-      { description }
-    );
+    const apiRes = await axios.post(process.env.LLM_API_URL + "/api/generate", {
+      description,
+    });
     return res.status(200).json(apiRes.data);
   } catch (error) {
     console.error("Error generating file:", error);
