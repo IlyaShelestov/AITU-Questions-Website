@@ -15,7 +15,12 @@ const chatRoutes = require("./routes/chatRoutes");
 const userActionsRoutes = require("./routes/userActionsRoutes");
 const requestsRoutes = require("./routes/requestsRoutes");
 
+const { metricsMiddleware } = require('./utils/metrics');
+const metricsRoutes = require('./routes/metrics');
+
 const app = express();
+
+app.use(metricsMiddleware);
 
 const corsOptions = {
   origin: process.env.FRONTEND_URL || "http://localhost:3000",
@@ -93,6 +98,7 @@ app.use("/files", verifyToken, filesRoutes);
 app.use("/chat", verifyToken, chatRoutes);
 app.use("/admin", verifyToken, isAdmin, adminRoutes);
 app.use("/admin/actions", verifyToken, isAdmin, userActionsRoutes);
+app.use('/metrics', metricsRoutes);
 
 app.use((req, res, next) => {
   res.status(404).render("404");
