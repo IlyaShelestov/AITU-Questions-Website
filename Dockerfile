@@ -1,4 +1,4 @@
-FROM node:21-alpine
+FROM node:21-slim
 
 WORKDIR /app
 
@@ -11,8 +11,11 @@ RUN npm install
 # Копируем весь код из src/
 COPY src/ .
 
+COPY entrypoint.sh ./
+RUN chmod +x ./entrypoint.sh
+
 # Открываем порт 7000
 EXPOSE 7000
 
 # Запуск приложения через npm start
-CMD ["npm", "start"]
+ENTRYPOINT ["./entrypoint.sh"]

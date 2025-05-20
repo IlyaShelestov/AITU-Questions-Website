@@ -211,3 +211,15 @@
   content: "📄";
   margin-right: 5px;
 }
+
+.file-upload-label {
+  margin-left: 8px;
+}
+
+.file-upload-icon {
+  transition: color 0.2s;
+}
+
+.file-upload-label:hover .file-upload-icon {
+  color: #007bff;
+}
