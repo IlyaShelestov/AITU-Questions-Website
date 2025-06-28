@@ -1,152 +1,240 @@
-<%- include('partials/header', { title: 'Student Requests', customCss: 'requests', customJs: 'requests' }) %>
+<%- include('partials/header', { title: 'Обращения Студентов', customCss: 'requests'}) %>
 
-<div class="container mt-4">
-  <h1>Student Requests</h1>
-  
-  <div class="filter-section mb-4">
-    <form action="/requests" method="GET" class="d-flex align-items-center">
-      <div class="form-group me-2">
-        <select name="status" class="form-control">
-          <option value="">All Statuses</option>
-          <option value="new" <%= currentStatus === 'new' ? 'selected' : '' %>>New</option>
-          <option value="in_progress" <%= currentStatus === 'in_progress' ? 'selected' : '' %>>In Progress</option>
-          <option value="completed" <%= currentStatus === 'completed' ? 'selected' : '' %>>Completed</option>
-          <option value="rejected" <%= currentStatus === 'rejected' ? 'selected' : '' %>>Rejected</option>
-        </select>
-      </div>
-      <button type="submit" class="btn btn-primary">Filter</button>
-    </form>
-  </div>
-
-  <% if (requests.length === 0) { %>
-    <div class="alert alert-info">No requests found.</div>
-  <% } else { %>
-    <div class="table-responsive">
-      <table class="table table-striped">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Student</th>
-            <th>Message</th>
-            <th>Status</th>
-            <th>Created</th>
-            <th>Updated</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% requests.forEach(request => { %>
-            <tr data-request-id="<%= request.request_id %>">
-              <td><%= request.request_id %></td>
-              <td><%= request.user_name %></td>
-              <td>
-                <div class="message-cell">
-                  <%= request.message %>
-                </div>
-              </td>
-              <td>
-                <span class="status-badge <%= request.status %>"><%= request.status === 'rejected' ? 'Closed' : request.status.replace('_', ' ') %></span>
-              </td>
-              <td><%= new Date(request.created_at).toLocaleString() %></td>
-              <td><%= request.updated_at ? new Date(request.updated_at).toLocaleString() : '-' %></td>
-              <td>
-                <div class="btn-group">
-                  <% if (request.status !== 'completed' && request.status !== 'rejected') { %>
-                  <% if (request.status === 'new') { %>
-                    <button class="btn btn-sm btn-primary update-status" data-status="in_progress">
-                      In Progress
-                    </button>
-                  <% } %>
-                  <% if (request.status === 'in_progress') { %>
-                    <button class="btn btn-sm btn-success answer-request" data-id="<%= request.request_id %>" data-telegram="<%= request.telegram_id %>" data-username="<%= request.user_name %>">
-                      Answer
-                    </button>
-                    <button class="btn btn-sm btn-danger update-status" data-status="rejected">
-                      Close
-                    </button>
-                  <% } %>
-                  <% } %>
-                </div>
-              </td>
-            </tr>
-          <% }) %>
-        </tbody>
-      </table>
-    </div>
+<div class="content-container">
+  <div class="requests-container">
     
-    <% if (pagination && pagination.total > 1) { %>
-      <div class="pagination">
-        <div class="pagination-controls">
-          <% if (pagination.prev) { %>
-            <a href="?page=<%= pagination.prev %><%= currentStatus ? '&status=' + currentStatus : '' %>" class="btn btn-sm btn-outline-secondary">Previous</a>
-          <% } else { %>
-            <button disabled class="btn btn-sm btn-outline-secondary">Previous</button>
-          <% } %>
-          
-          <% 
-            const startPage = Math.max(1, pagination.current - 2);
-            const endPage = Math.min(pagination.total, startPage + 4);
-          %>
-          
-          <% if (startPage > 1) { %>
-            <a href="?page=1<%= currentStatus ? '&status=' + currentStatus : '' %>" class="btn btn-sm btn-outline-secondary">1</a>
-            <% if (startPage > 2) { %><span class="pagination-ellipsis">...</span><% } %>
-          <% } %>
-          
-          <% for (let i = startPage; i <= endPage; i++) { %>
-            <% if (i === pagination.current) { %>
-              <button disabled class="btn btn-sm btn-primary"><%= i %></button>
-            <% } else { %>
-              <a href="?page=<%= i %><%= currentStatus ? '&status=' + currentStatus : '' %>" class="btn btn-sm btn-outline-secondary"><%= i %></a>
-            <% } %>
-          <% } %>
-          
-          <% if (endPage < pagination.total) { %>
-            <% if (endPage < pagination.total - 1) { %><span class="pagination-ellipsis">...</span><% } %>
-            <a href="?page=<%= pagination.total %><%= currentStatus ? '&status=' + currentStatus : '' %>" class="btn btn-sm btn-outline-secondary"><%= pagination.total %></a>
-          <% } %>
-          
-          <% if (pagination.next) { %>
-            <a href="?page=<%= pagination.next %><%= currentStatus ? '&status=' + currentStatus : '' %>" class="btn btn-sm btn-outline-secondary">Next</a>
-          <% } else { %>
-            <button disabled class="btn btn-sm btn-outline-secondary">Next</button>
-          <% } %>
+    <!-- Requests Header -->
+    <div class="requests-header">
+      <h1 class="requests-title">Обращения Студентов</h1>
+      
+      <!-- Filter Section -->
+      <div class="filter-section">
+        <form action="/requests" method="GET" class="filter-form">
+          <div class="form-group">
+            <label for="status">
+              <i data-lucide="filter"></i>
+              Статус
+            </label>
+            <select name="status" id="status" class="form-control">
+              <option value="">Все статусы</option>
+              <option value="new" <%= currentStatus === 'new' ? 'selected' : '' %>>Новые</option>
+              <option value="in_progress" <%= currentStatus === 'in_progress' ? 'selected' : '' %>>В процессе</option>
+              <option value="completed" <%= currentStatus === 'completed' ? 'selected' : '' %>>Завершено</option>
+              <option value="rejected" <%= currentStatus === 'rejected' ? 'selected' : '' %>>Закрыто</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary">
+            <i data-lucide="search"></i>
+            Фильтр
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Requests Content -->
+    <div class="requests-content">
+      <% if (requests.length === 0) { %>
+        <div class="empty-state">
+          <i data-lucide="inbox"></i>
+          <h3>Обращений не найдено</h3>
+          <p>На данный момент нет обращений, соответствующих выбранным критериям.</p>
+        </div>
+      <% } else { %>
+        <div class="requests-table-container">
+          <table class="requests-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Студент</th>
+                <th>Сообщение</th>
+                <th>Статус</th>
+                <th>Создано</th>
+                <th>Обновлено</th>
+                <th>Действия</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% requests.forEach(request => { %>
+                <tr class="request-row" data-request-id="<%= request.request_id %>">
+                  <td class="request-id">#<%= request.request_id %></td>
+                  <td class="student-name">
+                    <div class="student-info">
+                      <i data-lucide="user"></i>
+                      <%= request.user_name %>
+                    </div>
+                  </td>
+                  <td class="request-message">
+                    <div class="message-cell">
+                      <%= request.message %>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="status-badge <%= request.status %>">
+                      <% if (request.status === 'new') { %>
+                        <i data-lucide="clock"></i>
+                        Новое
+                      <% } else if (request.status === 'in_progress') { %>
+                        <i data-lucide="activity"></i>
+                        В процессе
+                      <% } else if (request.status === 'completed') { %>
+                        <i data-lucide="check-circle"></i>
+                        Завершено
+                      <% } else if (request.status === 'rejected') { %>
+                        <i data-lucide="x-circle"></i>
+                        Закрыто
+                      <% } %>
+                    </span>
+                  </td>
+                  <td class="request-date">
+                    <%= new Date(request.created_at).toLocaleDateString('ru-RU', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    }) %>
+                  </td>
+                  <td class="request-updated">
+                    <%= request.updated_at ? new Date(request.updated_at).toLocaleDateString('ru-RU', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    }) : '-' %>
+                  </td>
+                  <td>
+                    <div class="request-actions">
+                      <% if (request.status !== 'completed' && request.status !== 'rejected') { %>
+                        <% if (request.status === 'new') { %>
+                          <button class="action-btn primary update-status" data-status="in_progress">
+                            <i data-lucide="play"></i>
+                            Начать
+                          </button>
+                        <% } %>
+                        <% if (request.status === 'in_progress') { %>
+                          <button class="action-btn success answer-request" data-id="<%= request.request_id %>" data-telegram="<%= request.telegram_id %>" data-username="<%= request.user_name %>">
+                            <i data-lucide="message-square"></i>
+                            Ответить
+                          </button>
+                          <button class="action-btn danger update-status" data-status="rejected">
+                            <i data-lucide="x"></i>
+                            Закрыть
+                          </button>
+                        <% } %>
+                      <% } %>
+                    </div>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
         </div>
         
-        <div class="pagination-info">
-          Page <%= pagination.current %> of <%= pagination.total %>
-        </div>
-      </div>
-    <% } %>
-  <% } %>
+        <!-- Pagination -->
+        <% if (pagination && pagination.total > 1) { %>
+          <div class="pagination">
+            <div class="pagination-controls">
+              <% if (pagination.prev) { %>
+                <a href="?page=<%= pagination.prev %><%= currentStatus ? '&status=' + currentStatus : '' %>" class="btn btn-secondary">
+                  <i data-lucide="chevron-left"></i>
+                  Назад
+                </a>
+              <% } else { %>
+                <button disabled class="btn btn-secondary">
+                  <i data-lucide="chevron-left"></i>
+                  Назад
+                </button>
+              <% } %>
+              
+              <% 
+                const startPage = Math.max(1, pagination.current - 2);
+                const endPage = Math.min(pagination.total, startPage + 4);
+              %>
+              
+              <% if (startPage > 1) { %>
+                <a href="?page=1<%= currentStatus ? '&status=' + currentStatus : '' %>" class="btn btn-secondary">1</a>
+                <% if (startPage > 2) { %><span class="pagination-ellipsis">...</span><% } %>
+              <% } %>
+              
+              <% for (let i = startPage; i <= endPage; i++) { %>
+                <% if (i === pagination.current) { %>
+                  <button class="btn btn-primary current-page"><%= i %></button>
+                <% } else { %>
+                  <a href="?page=<%= i %><%= currentStatus ? '&status=' + currentStatus : '' %>" class="btn btn-secondary"><%= i %></a>
+                <% } %>
+              <% } %>
+              
+              <% if (endPage < pagination.total) { %>
+                <% if (endPage < pagination.total - 1) { %><span class="pagination-ellipsis">...</span><% } %>
+                <a href="?page=<%= pagination.total %><%= currentStatus ? '&status=' + currentStatus : '' %>" class="btn btn-secondary"><%= pagination.total %></a>
+              <% } %>
+              
+              <% if (pagination.next) { %>
+                <a href="?page=<%= pagination.next %><%= currentStatus ? '&status=' + currentStatus : '' %>" class="btn btn-secondary">
+                  Вперед
+                  <i data-lucide="chevron-right"></i>
+                </a>
+              <% } else { %>
+                <button disabled class="btn btn-secondary">
+                  Вперед
+                  <i data-lucide="chevron-right"></i>
+                </button>
+              <% } %>
+            </div>
+            
+            <div class="pagination-info">
+              Страница <%= pagination.current %> из <%= pagination.total %>
+            </div>
+          </div>
+        <% } %>
+      <% } %>
+    </div>
+  </div>
+</div>
 
-  <div class="modal" id="answer-modal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Answer Request</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <form id="answer-form">
-            <input type="hidden" id="request-id">
-            <input type="hidden" id="telegram-id">
-            <div class="form-group">
-              <label for="student-name">Student:</label>
-              <input type="text" class="form-control" id="student-name" readonly>
-            </div>
-            <div class="form-group">
-              <label for="answer-text">Your Answer:</label>
-              <textarea class="form-control" id="answer-text" rows="4" required></textarea>
-            </div>
-          </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary" id="send-answer">Send Answer</button>
-        </div>
+<!-- Answer Modal -->
+<div class="modal" id="answer-modal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i data-lucide="message-square"></i>
+          Ответить на обращение
+        </h5>
+        <button type="button" class="modal-close" data-dismiss="modal">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="answer-form">
+          <input type="hidden" id="request-id">
+          <input type="hidden" id="telegram-id">
+          <div class="form-group">
+            <label for="student-name">
+              <i data-lucide="user"></i>
+              Студент
+            </label>
+            <input type="text" class="form-control" id="student-name" readonly>
+          </div>
+          <div class="form-group">
+            <label for="answer-text">
+              <i data-lucide="edit"></i>
+              Ваш ответ
+            </label>
+            <textarea class="form-control" id="answer-text" rows="4" placeholder="Введите ваш ответ..." required></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          <i data-lucide="x"></i>
+          Отмена
+        </button>
+        <button type="button" class="btn btn-primary" id="send-answer">
+          <i data-lucide="send"></i>
+          Отправить ответ
+        </button>
       </div>
     </div>
   </div>

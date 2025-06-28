@@ -1,33 +1,41 @@
-<%- include('partials/header', { title: 'User Actions Panel', customCss: 'userActions' }) %>
+<%- include('partials/header', { title: 'Действия пользователей', customCss: 'userActions' }) %>
+
+<%
+const actionTypeTranslations = {
+    'upload': 'Загрузка',
+    'download': 'Скачивание',
+    'delete': 'Удаление',
+    'replace': 'Замена'
+};
+%>
 
 <div class="actions-container">
-    <h1>User Actions Panel</h1>
 
     <div class="admin-nav">
-        <a href="/admin" class="nav-item">User Management</a>
-        <a href="/admin/actions" class="nav-item active">User Actions</a>
+        <a href="/admin" class="nav-item">Управление пользователями</a>
+        <a href="/admin/actions" class="nav-item active">Действия пользователей</a>
     </div>
     
     <div class="actions-filter">
-        <h2>Filter Actions</h2>
+        <h2>Фильтр действий</h2>
         <form id="filter-form" method="GET" action="/admin/actions">
             <div class="form-row">
                 <div class="form-group">
-                    <label for="actionType">Action Type</label>
-                    <select id="actionType" name="actionType">
-                        <option value="">All Actions</option>
+                    <label for="actionType">Тип действия</label>
+                    <select id="actionType" name="actionType" class="form-control">
+                        <option value="">Все действия</option>
                         <% actionTypes.forEach(type => { %>
                             <option value="<%= type %>" <%= filters.actionType === type ? 'selected' : '' %>>
-                                <%= type.charAt(0).toUpperCase() + type.slice(1) %>
+                                <%= actionTypeTranslations[type] || (type.charAt(0).toUpperCase() + type.slice(1)) %>
                             </option>
                         <% }); %>
                     </select>
                 </div>
                 
                 <div class="form-group">
-                    <label for="userId">User</label>
-                    <select id="userId" name="userId">
-                        <option value="">All Users</option>
+                    <label for="userId">Пользователь</label>
+                    <select id="userId" name="userId" class="form-control">
+                        <option value="">Все пользователи</option>
                         <% users.forEach(user => { %>
                             <option value="<%= user.user_id %>" <%= filters.userId === user.user_id.toString() ? 'selected' : '' %>>
                                 <%= user.name %> <%= user.surname %>
@@ -39,57 +47,60 @@
             
             <div class="form-row">
                 <div class="form-group">
-                    <label for="startDate">Start Date</label>
-                    <input type="date" id="startDate" name="startDate" value="<%= filters.startDate || '' %>">
+                    <label for="startDate">Дата начала</label>
+                    <input type="date" id="startDate" name="startDate" value="<%= filters.startDate || '' %>" class="form-control">
                 </div>
                 
                 <div class="form-group">
-                    <label for="endDate">End Date</label>
-                    <input type="date" id="endDate" name="endDate" value="<%= filters.endDate || '' %>">
+                    <label for="endDate">Дата окончания</label>
+                    <input type="date" id="endDate" name="endDate" value="<%= filters.endDate || '' %>" class="form-control">
                 </div>
             </div>
             
             <div class="button-group">
-                <button type="submit" class="btn btn-primary">Apply Filters</button>
-                <a href="/admin/actions" class="btn btn-secondary">Clear Filters</a>
+                <button type="submit" class="btn btn-primary">Применить фильтры</button>
+                <a href="/admin/actions" class="btn btn-secondary">Очистить фильтры</a>
             </div>
         </form>
     </div>
     
     <div class="actions-list">
-        <h2>Activity Logs</h2>
+        <h2>Журнал активности</h2>
         
         <% if (actions && actions.length > 0) { %>
             <table>
                 <thead>
                     <tr>
-                        <th>Date & Time</th>
-                        <th>User</th>
-                        <th>Action</th>
-                        <th>Resource</th>
-                        <th>Details</th>
+                        <th>Дата и время</th>
+                        <th>Пользователь</th>
+                        <th>Действие</th>
+                        <th>Ресурс</th>
+                        <th>Детали</th>
                     </tr>
                 </thead>
                 <tbody>
                     <% actions.forEach(action => { %>
                         <tr>
                             <td>
-                                <%= new Date(action.created_at).toLocaleString('en-US', {
+                                <%= new Date(action.created_at).toLocaleString('ru-RU', {
                                     year: 'numeric',
                                     month: 'short',
                                     day: 'numeric',
                                     hour: '2-digit',
-                                    minute: '2-digit',
-                                    hour12: true
+                                    minute: '2-digit'
                                 }) %>
                             </td>
                             <td><%= action.user_name %> <%= action.user_surname %></td>
-                            <td class="action-type action-<%= action.action_type %>">
-                                <%= action.action_type.charAt(0).toUpperCase() + action.action_type.slice(1) %>
+                            <td>
+                                <span class="action-type action-<%= action.action_type.toLowerCase() %>">
+                                    <%= actionTypeTranslations[action.action_type.toLowerCase()] || (action.action_type.charAt(0).toUpperCase() + action.action_type.slice(1)) %>
+                                </span>
                             </td>
                             <td>
                                 <%= action.resource_name %>
-                                <small>(<%= action.resource_type %>)</small>
+                                <% if (action.resource_type) { %>
+                                    <small>(<%= action.resource_type %>)</small>
+                                <% } %>
                             </td>
                             <td><%= action.details %></td>
                         </tr>
@@ -104,28 +115,28 @@
                         <a href="?page=<%= pagination.prev %>&<%= 
                             Object.entries(filters)
                                 .filter(([key]) => key !== 'page')
-                                .map(([key, value]) => `${key}=${value}`)
+                                .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
                                 .join('&') 
-                        %>" class="btn btn-secondary">Previous</a>
+                        %>" class="btn btn-secondary">Назад</a>
                     <% } %>
                     
-                    <span class="pagination-info">Page <%= pagination.current %> of <%= pagination.total %></span>
+                    <span class="pagination-info">Страница <%= pagination.current %> из <%= pagination.total %></span>
                     
                     <% if (pagination.next) { %>
                         <a href="?page=<%= pagination.next %>&<%= 
                             Object.entries(filters)
                                 .filter(([key]) => key !== 'page')
-                                .map(([key, value]) => `${key}=${value}`)
+                                .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
                                 .join('&') 
-                        %>" class="btn btn-secondary">Next</a>
+                        %>" class="btn btn-secondary">Вперед</a>
                     <% } %>
                 </div>
             <% } %>
         <% } else { %>
             <div class="empty-state">
-                <p>No user actions found.</p>
-                <% if (Object.keys(filters).length > 0) { %>
-                    <p>Try clearing the filters to see all actions.</p>
+                <p>Действия пользователей не найдены.</p>
+                <% if (Object.keys(filters).length > 1 || (Object.keys(filters).length === 1 && !filters.page)) { %>
+                    <p>Попробуйте очистить фильтры, чтобы увидеть все действия.</p>
                 <% } %>
             </div>
         <% } %>

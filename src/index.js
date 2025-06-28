@@ -43,29 +43,29 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-app.use(
-  helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        imgSrc: ["'self'", "data:"],
-        connectSrc: ["'self'"],
-        frameAncestors: ["'none'"],
-      },
-    },
-    crossOriginOpenerPolicy: { policy: "same-origin" },
-    crossOriginResourcePolicy: { policy: "same-origin" },
-    referrerPolicy: { policy: "strict-origin-when-cross-origin" },
-    hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
-    xFrameOptions: { action: "deny" },
-    xContentTypeOptions: true,
-    xDnsPrefetchControl: { allow: false },
-    permittedCrossDomainPolicies: { policy: "none" },
-    hidePoweredBy: true,
-  })
-);
+// app.use(
+//   helmet({
+//     contentSecurityPolicy: {
+//       directives: {
+//         defaultSrc: ["'self'"],
+//         scriptSrc: ["'self'", "'unsafe-inline'"],
+//         styleSrc: ["'self'", "'unsafe-inline'"],
+//         imgSrc: ["'self'", "data:"],
+//         connectSrc: ["'self'"],
+//         frameAncestors: ["'none'"],
+//       },
+//     },
+//     crossOriginOpenerPolicy: { policy: "same-origin" },
+//     crossOriginResourcePolicy: { policy: "same-origin" },
+//     referrerPolicy: { policy: "strict-origin-when-cross-origin" },
+//     hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
+//     xFrameOptions: { action: "deny" },
+//     xContentTypeOptions: true,
+//     xDnsPrefetchControl: { allow: false },
+//     permittedCrossDomainPolicies: { policy: "none" },
+//     hidePoweredBy: true,
+//   })
+// );
 
 const limiterOptions = {
   windowMs: 15 * 60 * 1000,

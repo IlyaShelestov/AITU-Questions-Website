@@ -1,58 +1,56 @@
-<%- include('partials/header', { title: 'Admin Dashboard', customCss: 'admin' }) %>
+<%- include('partials/header', { title: 'Панель Администратора', customCss: 'admin' }) %>
 
 <div class="admin-container">
-    <h1>Admin Dashboard</h1>
     
     <div class="admin-nav">
-        <a href="/admin" class="nav-item active">User Management</a>
-        <a href="/admin/actions" class="nav-item">User Actions</a>
+        <a href="/admin" class="nav-item active">Управление пользователями</a>
+        <a href="/admin/actions" class="nav-item">Действия пользователей</a>
     </div>
     
     <div class="user-management">
-        <h2>User Management</h2>
         
         <div class="add-user-section">
-            <h3>Add New User</h3>
+            <h3>Добавить нового пользователя</h3>
             <form id="add-user-form">
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="email">Email</label>
-                        <input type="email" id="email" name="email" required>
+                        <label for="email">Электронная почта</label>
+                        <input type="email" id="email" name="email" class="form-control" required>
                     </div>
                     
                     <div class="form-group">
-                        <label for="password">Password</label>
-                        <input type="password" id="password" name="password" required>
+                        <label for="password">Пароль</label>
+                        <input type="password" id="password" name="password" class="form-control" required>
                     </div>
                 </div>
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="name">First Name</label>
-                        <input type="text" id="name" name="name" required>
+                        <label for="name">Имя</label>
+                        <input type="text" id="name" name="name" class="form-control" required>
                     </div>
                     
                     <div class="form-group">
-                        <label for="surname">Last Name</label>
-                        <input type="text" id="surname" name="surname" required>
+                        <label for="surname">Фамилия</label>
+                        <input type="text" id="surname" name="surname" class="form-control" required>
                     </div>
                 </div>
                 
                 <div class="form-group">
-                    <label for="role">Role</label>
-                    <select id="role" name="role">
-                        <option value="user">User</option>
-                        <option value="manager">Manager</option>
-                        <option value="admin">Admin</option>
+                    <label for="role">Роль</label>
+                    <select id="role" name="role" class="form-control">
+                        <option value="user">Пользователь</option>
+                        <option value="manager">Менеджер</option>
+                        <option value="admin">Администратор</option>
                     </select>
                 </div>
                 
-                <button type="submit" class="btn btn-primary">Add User</button>
+                <button type="submit" class="btn btn-primary">Добавить пользователя</button>
             </form>
         </div>
         
         <div class="users-section">
-            <h3>All Users</h3>
+            <h3>Все пользователи</h3>
             <div id="status-message"></div>
             <div class="user-list">
                 <% if (users && users.length > 0) { %>
@@ -60,10 +58,10 @@
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>Email</th>
-                                <th>Name</th>
-                                <th>Role</th>
-                                <th>Actions</th>
+                                <th>Электронная почта</th>
+                                <th>Имя</th>
+                                <th>Роль</th>
+                                <th>Действия</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -74,15 +72,15 @@
                                     <td><%= user.name %> <%= user.surname %></td>
                                     <td><%= user.role %></td>
                                     <td>
-                                        <button class="btn btn-edit edit-user" data-id="<%= user.user_id %>">Edit</button>
-                                        <button class="btn btn-danger delete-user" data-id="<%= user.user_id %>">Delete</button>
+                                        <button class="btn btn-secondary btn-edit edit-user" data-id="<%= user.user_id %>">Редактировать</button>
+                                        <button class="btn btn-danger delete-user" data-id="<%= user.user_id %>">Удалить</button>
                                     </td>
                                 </tr>
                             <% }); %>
                         </tbody>
                     </table>
                 <% } else { %>
-                    <p>No users found.</p>
+                    <p>Пользователи не найдены.</p>
                 <% } %>
             </div>
         </div>
@@ -92,44 +90,44 @@
     <div id="edit-user-modal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <h2>Edit User</h2>
+            <h2>Редактировать пользователя</h2>
             <form id="edit-user-form">
                 <input type="hidden" id="edit-user-id">
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="edit-email">Email</label>
-                        <input type="email" id="edit-email" name="email">
+                        <label for="edit-email">Электронная почта</label>
+                        <input type="email" id="edit-email" name="email" class="form-control">
                     </div>
                     
                     <div class="form-group">
-                        <label for="edit-password">Password (leave blank to keep current)</label>
-                        <input type="password" id="edit-password" name="password">
+                        <label for="edit-password">Пароль (оставьте пустым, чтобы не менять)</label>
+                        <input type="password" id="edit-password" name="password" class="form-control">
                     </div>
                 </div>
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="edit-name">First Name</label>
-                        <input type="text" id="edit-name" name="name">
+                        <label for="edit-name">Имя</label>
+                        <input type="text" id="edit-name" name="name" class="form-control">
                     </div>
                     
                     <div class="form-group">
-                        <label for="edit-surname">Last Name</label>
-                        <input type="text" id="edit-surname" name="surname">
+                        <label for="edit-surname">Фамилия</label>
+                        <input type="text" id="edit-surname" name="surname" class="form-control">
                     </div>
                 </div>
                 
                 <div class="form-group">
-                    <label for="edit-role">Role</label>
-                    <select id="edit-role" name="role">
-                        <option value="user">User</option>
-                        <option value="manager">Manager</option>
-                        <option value="admin">Admin</option>
+                    <label for="edit-role">Роль</label>
+                    <select id="edit-role" name="role" class="form-control">
+                        <option value="user">Пользователь</option>
+                        <option value="manager">Менеджер</option>
+                        <option value="admin">Администратор</option>
                     </select>
                 </div>
                 
-                <button type="submit" class="btn btn-primary">Update User</button>
+                <button type="submit" class="btn btn-primary">Обновить пользователя</button>
             </form>
         </div>
     </div>

@@ -4,35 +4,71 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= title %> | AITU Connect</title>
+    
+    <!-- Google Fonts - Raleway -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="/css/styles.css">
     <% if (locals.customCss) { %>
         <link rel="stylesheet" href="/css/<%= customCss %>.css">
     <% } %>
 </head>
 <body>
-    <header>
-        <div class="logo">AITU Connect</div>
-        <% if (locals.user) { %>
-            <nav class="main-nav">
-                <ul>
-                    <li><a href="/chat">Chat</a></li>
-                    <li><a href="/files">Files</a></li>
-                    <% if (user.role === 'admin' || user.role === 'manager') { %>
-                        <li><a href="/requests">Requests</a></li>
-                    <% } %> 
-                    <% if (user.role === 'admin') { %>
-                        <li><a href="/admin">Admin</a></li>
-                    <% } %>
-                </ul>
-            </nav>
-            <div class="user-controls">
-                <div class="user-info">
-                    <span class="user-name"><%= user.name %> <%= user.surname %></span>
-                </div>
-                <form action="/auth/logout" method="POST">
-                    <button type="submit">Logout</button>
+    <% if (locals.user) { %>
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="user-avatar">
+                <%= user.name.charAt(0).toUpperCase() %>
+            </div>
+            
+            <!-- Underline after profile -->
+            <div class="profile-underline"></div>
+            
+            <!-- Navigation Tabs -->
+            <a href="/chat" class="nav-tab <%= title === 'Чаты' ? 'active' : '' %>" title="Chat">
+                <i data-lucide="message-circle"></i>
+            </a>
+            
+            <a href="/files" class="nav-tab <%= title === 'Документы' ? 'active' : '' %>" title="Documents">
+                <i data-lucide="folder"></i>
+            </a>
+            
+            <% if (user.role === 'admin' || user.role === 'manager') { %>
+                <a href="/requests" class="nav-tab <%= title === 'Обращения Студентов' ? 'active' : '' %>" title="Requests">
+                    <i data-lucide="clipboard-list"></i>
+                </a>
+            <% } %>
+            
+            <% if (user.role === 'admin') { %>
+                <a href="/admin" class="nav-tab <%= title === 'Панель Администратора' || title === 'Управление пользователями' ? 'active' : '' %>" title="Admin">
+                    <i data-lucide="users"></i>
+                </a>
+            <% } %>
+            
+            <!-- Bottom Actions -->
+            <div class="sidebar-bottom">
+                <a href="#" class="action-circle" title="Settings">
+                    <i data-lucide="settings"></i>
+                </a>
+                
+                <form action="/auth/logout" method="POST" style="margin: 0;">
+                    <button type="submit" class="action-circle" title="Logout">
+                        <i data-lucide="log-out"></i>
+                    </button>
                 </form>
             </div>
-        <% } %>
-    </header>
-    <main>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <header class="top-header">
+                <h1 class="page-title"><%= title %></h1>
+                <div class="connect-logo">Connect</div>
+            </header>
+            <main class="content-area">
+    <% } else { %>
+        <div class="main-content">
+            <main class="content-area">
+    <% } %>

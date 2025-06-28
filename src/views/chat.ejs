@@ -1,54 +1,81 @@
-<%- include('partials/header', { title: 'Chat with AI', customCss: 'chat' }) %>
+<%- include('partials/header', { title: 'Чаты', customCss: 'chat' }) %>
 
-<div class="chat-container">
-  <h1>Chat with AI</h1>
-
-  <div class="chat-box" id="chat-box" data-session-id="<%= sessionId %>">
-    <div class="welcome-message">
-      <p>Welcome to AITU Questions Chat!</p>
-      <p>If you have questions about courses, policies, or academic resources, just ask and our AI assistant will help.</p>
-      <p>
-        Type <code>/flowchart your question</code> to generate a flowchart
-        diagram.
-      </p>
-      <p>
-        Type <code>/generate</code> to generate a file.
-      </p>
-    </div>
-
-    <div id="messages">
-      <% if (messages && messages.length > 0) { %> <% messages.forEach(msg => {
-      %>
-      <div class="message <%= msg.isUser ? 'user' : 'ai' %>" data-sources="<%= JSON.stringify(msg.sources || []) %>">
-        <div class="message-content" data-is-user="<%= msg.isUser %>">
-          <%= msg.content %>
-        </div>
-        <div class="message-time"><%= msg.timestamp %></div>
-      </div>
-      <% }); %> <% } %>
-    </div>
-  </div>
-
-  <div class="chat-input">
-    <form id="chat-form" enctype="multipart/form-data">
-      <input
-        type="text"
-        id="message-input"
-        placeholder="Type your question here..."
-        autofocus
-      />
-      <label for="file-input" class="file-upload-label" title="Attach a file for instant analysis">
-        <input type="file" id="file-input" name="file" style="display:none;" />
-        <span class="file-upload-icon" style="cursor:pointer; font-size:1.5em; vertical-align:middle;">📎</span>
-      </label>
-      <button type="submit" class="btn btn-primary">Send</button>
-      <button type="button" id="clear-chat" class="btn btn-danger">
-        Clear
+<div class="content-container">
+  <div class="chat-container">
+    <!-- Chat Tabs -->
+    <div class="chat-tabs">
+      <button class="chat-tab active">
+        <i data-lucide="brain" style="width: 16px; height: 16px; margin-right: 8px;"></i>
+        Общая модель
       </button>
-    </form>
+      <button class="chat-tab">
+        <i data-lucide="message-circle" style="width: 16px; height: 16px; margin-right: 8px;"></i>
+        Личный чат
+      </button>
+    </div>
+
+    <!-- Chat Content -->
+    <div class="chat-content" id="chat-box" data-session-id="<%= sessionId %>">
+      <% if (!messages || messages.length === 0) { %>
+        <div class="welcome-section">
+          <i data-lucide="bot" style="width: 48px; height: 48px; margin-bottom: 16px; color: var(--primary-blue);"></i>
+          <h2>Общайся с ИИ</h2>
+          <p>Сгенерируйте текст или спросите о чем-нибудь своего помощника-чат-бота с искусственным интеллектом.</p>
+          <p>Введите <code>/flowchart your question</code> для создания диаграммы.</p>
+          <p>Введите <code>/generate</code> для генерации файла.</p>
+        </div>
+      <% } %>
+
+      <div class="chat-messages" id="messages">
+        <% if (messages && messages.length > 0) { %>
+          <% messages.forEach(msg => { %>
+            <div class="message <%= msg.isUser ? 'user' : 'ai' %>" data-sources="<%= JSON.stringify(msg.sources || []) %>">
+              <div class="message-avatar">
+                <% if (msg.isUser) { %>
+                  <%= user.name.charAt(0).toUpperCase() %>
+                <% } else { %>
+                  <i data-lucide="bot" style="width: 16px; height: 16px;"></i>
+                <% } %>
+              </div>
+              <div class="message-content" data-is-user="<%= msg.isUser %>">
+                <%= msg.content %>
+              </div>
+            </div>
+          <% }); %>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Chat Input -->
+    <div class="chat-input-container">
+      <form id="chat-form" class="chat-input-form" enctype="multipart/form-data">
+        <label for="file-input" class="file-upload-btn" title="Прикрепить файл">
+          <i data-lucide="paperclip"></i>
+          <input type="file" id="file-input" name="file" style="display: none;" />
+        </label>
+        
+        <input 
+          type="text" 
+          id="message-input" 
+          class="chat-input"
+          placeholder="Отправить сообщение..." 
+          autofocus 
+        />
+        
+        <button type="submit" class="send-btn" title="Отправить">
+          <i data-lucide="send"></i>
+        </button>
+        
+        <button type="button" id="clear-chat" class="clear-btn" title="Очистить">
+          <i data-lucide="trash-2" style="width: 16px; height: 16px; margin-right: 4px;"></i>
+          <p>Очистить</p>
+        </button>
+      </form>
+    </div>
   </div>
-  <script src="/js/vendor/marked.min.js"></script>
-  <script src="/js/vendor/purify.min.js"></script>
 </div>
+
+<script src="/js/vendor/marked.min.js"></script>
+<script src="/js/vendor/purify.min.js"></script>
 
 <%- include('partials/footer', { customJs: 'chat' }) %>

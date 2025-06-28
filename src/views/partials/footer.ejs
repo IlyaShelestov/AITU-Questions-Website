@@ -1,12 +1,16 @@
 </main>
-<footer>
-    <p>&copy; <%= new Date().getFullYear() %> AITU. All rights reserved.</p>
-</footer>
-
-<a href="https://forms.gle/35tYmEoKYwWQ93rq6" target="_blank" class="feedback-button">Feedback</a>
+        </div>
 
 <% if (typeof customJs !== 'undefined' && customJs) { %>
     <script src="/js/<%= customJs %>.js"></script>
 <% } %>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>
+      document.addEventListener('DOMContentLoaded', function() {
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+  });
+  </script>
 </body>
 </html>

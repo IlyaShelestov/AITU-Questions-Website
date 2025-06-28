@@ -2,60 +2,91 @@ document.addEventListener("DOMContentLoaded", function () {
   const uploadForm = document.getElementById("upload-form");
   const uploadMessage = document.getElementById("upload-message");
   const deleteButtons = document.querySelectorAll(".delete-file");
-  const fileRows = document.querySelectorAll(".file-row");
-  const filterType = document.getElementById("filter-type");
-  const filterAudience = document.getElementById("filter-audience");
-  const filterUploader = document.getElementById("filter-uploader");
+  const fileRows = document.querySelectorAll(".document-row");
+  const searchInput = document.getElementById("search-input");
+  const filterBtn = document.getElementById("filter-btn");
+  const filterDropdown = document.getElementById("filter-dropdown");
+  const filterOptions = document.querySelectorAll(".filter-option");
   const similarityInput = document.getElementById("similarity-file-input");
   const similarityButton = document.getElementById("check-similarity-btn");
   const similarityResult = document.getElementById("similarity-result");
 
-  function applyFilters() {
-    const typeFilter = filterType.value;
-    const audienceFilter = filterAudience.value;
-    const uploaderFilter = filterUploader.value;
+  let currentFilter = "all";
 
-    document.querySelectorAll("#files-table tbody tr").forEach((row) => {
-      const rowType = row.getAttribute("data-type");
-      const rowAudience = row.getAttribute("data-audience");
-      const rowUploader = row.getAttribute("data-uploader");
+  // Filter dropdown functionality
+  if (filterBtn && filterDropdown) {
+    filterBtn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      filterDropdown.classList.toggle("show");
+    });
 
-      const typeMatch = typeFilter === "all" || rowType === typeFilter;
-      const audienceMatch =
-        audienceFilter === "all" || rowAudience === audienceFilter;
-      const uploaderMatch =
-        uploaderFilter === "all" || rowUploader === uploaderFilter;
+    document.addEventListener("click", function () {
+      filterDropdown.classList.remove("show");
+    });
 
-      if (typeMatch && audienceMatch && uploaderMatch) {
-        row.style.display = "";
-      } else {
-        row.style.display = "none";
-      }
+    filterOptions.forEach((option) => {
+      option.addEventListener("click", function () {
+        // Remove active class from all options
+        filterOptions.forEach((opt) => opt.classList.remove("active"));
+        // Add active class to clicked option
+        this.classList.add("active");
+
+        currentFilter = this.dataset.filter;
+        filterBtn.querySelector("span").textContent = this.textContent;
+        filterDropdown.classList.remove("show");
+
+        applyFilters();
+      });
     });
   }
 
-  if (filterType) {
-    filterType.addEventListener("change", applyFilters);
+  // Search functionality
+  if (searchInput) {
+    searchInput.addEventListener("input", applyFilters);
   }
 
-  if (filterAudience) {
-    filterAudience.addEventListener("change", applyFilters);
+  function applyFilters() {
+    const searchTerm = searchInput ? searchInput.value.toLowerCase() : "";
+
+    fileRows.forEach((row) => {
+      const fileName = row
+        .querySelector(".document-name")
+        .textContent.toLowerCase();
+      const fileType = row.dataset.type;
+      const audience = row.dataset.audience;
+
+      const matchesSearch = fileName.includes(searchTerm);
+      const matchesFilter =
+        currentFilter === "all" ||
+        fileType === currentFilter ||
+        audience === currentFilter;
+
+      row.style.display = matchesSearch && matchesFilter ? "" : "none";
+    });
   }
 
-  if (filterUploader) {
-    filterUploader.addEventListener("change", applyFilters);
-  }
+  // File row click to download
+  fileRows.forEach((row) => {
+    row.addEventListener("click", function (e) {
+      if (e.target.classList.contains("delete-file")) {
+        return;
+      }
 
+      const fileId = this.getAttribute("data-file-id");
+      window.location.href = `/files/download/${fileId}`;
+    });
+  });
+
+  // Upload form
   if (uploadForm) {
     uploadForm.addEventListener("submit", async function (e) {
       e.preventDefault();
 
       const formData = new FormData(this);
 
-      try {
-        uploadMessage.innerHTML = "<p>Uploading file...</p>";
-        uploadMessage.className = "";
+      showUploadMessage("Загрузка файла...", "info");
 
+      try {
         const response = await fetch("/files/upload", {
           method: "POST",
           body: formData,
@@ -64,84 +95,75 @@ document.addEventListener("DOMContentLoaded", function () {
         const result = await response.json();
 
         if (response.ok) {
-          uploadMessage.innerHTML = `<p>${result.message}</p>`;
-          uploadMessage.className = "success-message";
+          showUploadMessage(result.message, "success");
           setTimeout(() => {
             window.location.reload();
           }, 1500);
         } else {
-          uploadMessage.innerHTML = `<p>Error: ${result.error}</p>`;
-          uploadMessage.className = "error-message";
+          showUploadMessage(`Ошибка: ${result.error}`, "error");
         }
       } catch (error) {
         console.error("Upload error:", error);
-        uploadMessage.innerHTML =
-          "<p>Error uploading file. Please try again.</p>";
-        uploadMessage.className = "error-message";
+        showUploadMessage(
+          "Ошибка загрузки файла. Попробуйте еще раз.",
+          "error"
+        );
       }
     });
   }
 
+  function showUploadMessage(message, type) {
+    if (uploadMessage) {
+      uploadMessage.textContent = message;
+      uploadMessage.className = `upload-message ${type}`;
+      uploadMessage.style.display = "block";
+
+      if (type !== "info") {
+        setTimeout(() => {
+          uploadMessage.style.display = "none";
+        }, 5000);
+      }
+    }
+  }
+
+  // Delete functionality
   if (deleteButtons) {
     deleteButtons.forEach((button) => {
       button.addEventListener("click", async function (e) {
         e.stopPropagation();
-        const fileId = this.getAttribute("data-id");
 
-        if (confirm("Are you sure you want to delete this file?")) {
-          try {
-            const response = await fetch(`/files/${fileId}`, {
-              method: "DELETE",
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-              const fileRow = document.querySelector(
-                `tr[data-file-id="${fileId}"]`
-              );
-              if (fileRow) {
-                fileRow.remove();
-              }
-
-              const messageDiv = document.createElement("div");
-              messageDiv.className = "success-message";
-              messageDiv.textContent = result.message;
-              document.querySelector(".files-section").prepend(messageDiv);
-
-              setTimeout(() => {
-                messageDiv.remove();
-              }, 3000);
-            } else {
-              alert(`Error: ${result.error}`);
-            }
-          } catch (error) {
-            console.error("Delete error:", error);
-            alert("Error deleting file. Please try again.");
-          }
-        }
-      });
-    });
-  }
-
-  if (fileRows) {
-    fileRows.forEach((row) => {
-      row.addEventListener("click", function (e) {
-        if (e.target.classList.contains("delete-file")) {
+        if (!confirm("Вы уверены, что хотите удалить этот файл?")) {
           return;
         }
 
-        const fileId = this.getAttribute("data-file-id");
-        window.location.href = `/files/download/${fileId}`;
+        const fileId = this.getAttribute("data-id");
+
+        try {
+          const response = await fetch(`/files/delete/${fileId}`, {
+            method: "DELETE",
+          });
+
+          const result = await response.json();
+
+          if (response.ok) {
+            window.location.reload();
+          } else {
+            alert(`Ошибка: ${result.error}`);
+          }
+        } catch (error) {
+          console.error("Delete error:", error);
+          alert("Ошибка удаления файла. Попробуйте еще раз.");
+        }
       });
     });
   }
 
+  // Similarity check
   if (similarityButton && similarityInput) {
     similarityButton.addEventListener("click", async function () {
       const file = similarityInput.files[0];
       if (!file) {
-        similarityResult.innerHTML = "<p>Please select a file.</p>";
+        showSimilarityResult("Пожалуйста, выберите файл.", "error");
         return;
       }
 
@@ -151,45 +173,67 @@ document.addEventListener("DOMContentLoaded", function () {
         !fileName.endsWith(".xlsx") &&
         !fileName.endsWith(".pdf")
       ) {
-        similarityResult.innerHTML =
-          "<p>Only .docx, .xlsx, and .pdf files are allowed.</p>";
+        showSimilarityResult(
+          "Разрешены только файлы .docx, .xlsx и .pdf.",
+          "error"
+        );
         return;
       }
 
       const formData = new FormData();
       formData.append("file", file);
 
-      similarityResult.innerHTML = "<p>Checking similarity...</p>";
+      showSimilarityResult("Проверка схожести...", "info");
 
       try {
         const response = await fetch("/files/check-similarity", {
           method: "POST",
           body: formData,
         });
+
         const result = await response.json();
-        if (response.ok && result.possible_duplicates) {
-          if (result.possible_duplicates.length === 0) {
-            similarityResult.innerHTML = "<p>No similar files found.</p>";
+
+        if (response.ok) {
+          if (result.similar_files && result.similar_files.length > 0) {
+            let html = "<strong>Найдены схожие файлы:</strong><ul>";
+            result.similar_files.forEach((file) => {
+              html += `<li>${file.filename} (схожесть: ${(
+                file.similarity * 100
+              ).toFixed(1)}%)</li>`;
+            });
+            html += "</ul>";
+            showSimilarityResult(html, "success");
           } else {
-            similarityResult.innerHTML =
-              "<div class='similarity-results'><strong>Possible duplicates:</strong><ul>" +
-              result.possible_duplicates
-                .map(
-                  (dup) =>
-                    `<li>${dup.file} - Similarity: ${dup.similarity}%</li>`
-                )
-                .join("") +
-              "</ul></div>";
+            showSimilarityResult("Схожие файлы не найдены.", "success");
           }
         } else {
-          similarityResult.innerHTML = `<p class="error-message">Error: ${
-            result.error || "Failed to check similarity"
-          }</p>`;
+          showSimilarityResult(`Ошибка: ${result.error}`, "error");
         }
       } catch (error) {
-        similarityResult.innerHTML =
-          "<p class='error-message'>Error checking similarity. Please try again.</p>";
+        console.error("Similarity check error:", error);
+        showSimilarityResult("Ошибка проверки схожести.", "error");
       }
     });
+  }
+
+  function showSimilarityResult(message, type) {
+    if (similarityResult) {
+      similarityResult.innerHTML = message;
+      similarityResult.style.display = "block";
+
+      // Remove existing type classes
+      similarityResult.classList.remove("success", "error", "info");
+
+      if (type === "error") {
+        similarityResult.style.borderLeftColor = "#f44336";
+        similarityResult.style.backgroundColor = "#ffebee";
+      } else if (type === "success") {
+        similarityResult.style.borderLeftColor = "#4caf50";
+        similarityResult.style.backgroundColor = "#e8f5e9";
+      } else {
+        similarityResult.style.borderLeftColor = "var(--primary-blue)";
+        similarityResult.style.backgroundColor = "#f1f3f4";
+      }
+    }
   }
 });

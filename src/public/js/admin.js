@@ -143,7 +143,7 @@ document.addEventListener("DOMContentLoaded", function () {
       button.addEventListener("click", async function () {
         const userId = this.getAttribute("data-id");
 
-        if (confirm("Are you sure you want to delete this user?")) {
+        if (confirm("Вы уверены, что хотите удалить этого пользователя?")) {
           try {
             const response = await fetch(`/admin/users/${userId}`, {
               method: "DELETE",
@@ -165,7 +165,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
           } catch (error) {
             console.error("Error deleting user:", error);
-            showStatus("Error deleting user. Please try again.", true);
+            showStatus("Ошибка при удалении пользователя. Пожалуйста, попробуйте еще раз.", true);
           }
         }
       });
