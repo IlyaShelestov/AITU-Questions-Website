@@ -42,7 +42,7 @@
             <% } %>
             
             <% if (user.role === 'admin') { %>
-                <a href="/admin" class="nav-tab <%= title === 'Панель Администратора' || title === 'Управление пользователями' ? 'active' : '' %>" title="Admin">
+                <a href="/admin" class="nav-tab <%= title === 'Действия пользователей' || title === 'Управление пользователями' ? 'active' : '' %>" title="Admin">
                     <i data-lucide="users"></i>
                 </a>
             <% } %>
